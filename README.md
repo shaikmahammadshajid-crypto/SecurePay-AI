@@ -1,71 +1,80 @@
 # 🛡️ SecurePay AI
 
-> **Enterprise Credit Card Fraud Detection System using Machine Learning**
+<div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.45-red)
-![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-RandomForest-orange)
-![Status](https://img.shields.io/badge/Status-Live-success)
+### 🚀 Enterprise AI-Powered Credit Card Fraud Detection System
+
+An intelligent, production-ready web application that detects fraudulent credit card transactions using Machine Learning.
+
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.45-red?style=for-the-badge&logo=streamlit)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Random%20Forest-orange?style=for-the-badge&logo=scikitlearn)
+![SQLite](https://img.shields.io/badge/Database-SQLite-green?style=for-the-badge&logo=sqlite)
+![Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
+
+</div>
 
 ---
 
-# 📌 Overview
+# 📌 Project Overview
 
-SecurePay AI is an AI-powered web application designed to detect fraudulent credit card transactions using a trained Random Forest Machine Learning model. The system provides real-time fraud detection, batch prediction for large datasets, interactive analytics, secure user authentication, and detailed reporting.
+SecurePay AI is a production-ready Machine Learning application designed to detect fraudulent credit card transactions in real time. The system combines a trained Random Forest model with an interactive Streamlit interface to provide instant fraud detection, batch prediction, analytics, secure authentication, and downloadable reports.
+
+This project demonstrates the practical application of Artificial Intelligence and Machine Learning in financial cybersecurity.
 
 ---
 
 # ✨ Features
 
 - 🔐 Secure User Authentication
-- 💳 Manual Credit Card Fraud Prediction
-- 📂 Batch CSV Prediction
+- 💳 Real-Time Credit Card Fraud Prediction
+- 📂 Batch CSV Fraud Detection
 - 📊 Interactive Analytics Dashboard
-- 📈 Fraud Statistics Visualization
+- 📈 Fraud Detection Statistics
 - 📜 Prediction History
 - 📄 PDF Report Generation
 - 📥 CSV Export
-- 🗄️ SQLite Database
-- 🎨 Modern Responsive Streamlit Interface
+- 🗄️ SQLite Database Integration
+- 🎨 Modern Responsive Streamlit UI
 
 ---
 
 # 🤖 Machine Learning Model
 
-| Item | Details |
-|------|---------|
+| Attribute | Details |
+|-----------|---------|
 | Algorithm | Random Forest Classifier |
 | Dataset | European Credit Card Fraud Dataset |
-| Transactions | 284,807 |
+| Total Transactions | 284,807 |
 | Fraud Cases | 492 |
 | Features | 30 |
-| Accuracy | ~99.9% |
+| Prediction Type | Binary Classification |
 
 ---
 
-# 🛠️ Tech Stack
+# 🛠️ Technology Stack
 
-### Frontend
+## Frontend
 - Streamlit
 
-### Backend
+## Backend
 - Python
 
-### Machine Learning
+## Machine Learning
 - Scikit-learn
 - Joblib
 
-### Data Processing
+## Data Processing
 - Pandas
 - NumPy
 
-### Visualization
+## Data Visualization
 - Plotly
 
-### Database
+## Database
 - SQLite
 
-### Reporting
+## Report Generation
 - ReportLab
 
 ---
@@ -81,11 +90,27 @@ SecurePayAI/
 ├── README.md
 │
 ├── assets/
+│   └── style.css
+│
 ├── database/
+│
 ├── models/
+│   ├── random_forest.pkl
+│   └── scaler.pkl
+│
 ├── pages/
+│   ├── Login
+│   ├── Predict
+│   ├── Batch Prediction
+│   ├── Analytics
+│   ├── History
+│   ├── Profile
+│   └── About
+│
 ├── reports/
+│
 ├── utils/
+│
 └── screenshots/
 ```
 
@@ -93,25 +118,25 @@ SecurePayAI/
 
 # 🚀 Installation
 
-### Clone the repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/shaikmahammadshajid-crypto/SecurePay-AI.git
 ```
 
-### Navigate to the project
+## Navigate to Project
 
 ```bash
 cd SecurePay-AI
 ```
 
-### Install dependencies
+## Install Requirements
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run the application
+## Run Application
 
 ```bash
 streamlit run app.py
@@ -119,30 +144,30 @@ streamlit run app.py
 
 ---
 
-# 📊 Application Workflow
+# 📊 Workflow
 
-```
+```text
 User Login
-     │
-     ▼
+      │
+      ▼
 Enter Transaction Details
-     │
-     ▼
+      │
+      ▼
 Feature Scaling
-     │
-     ▼
-Random Forest Prediction
-     │
-     ▼
-Fraud Probability
-     │
-     ▼
-Store in Database
-     │
-     ▼
+      │
+      ▼
+Random Forest Model
+      │
+      ▼
+Fraud Prediction
+      │
+      ▼
+Store Results
+      │
+      ▼
 Analytics Dashboard
-     │
-     ▼
+      │
+      ▼
 Generate PDF & CSV Reports
 ```
 
@@ -150,7 +175,7 @@ Generate PDF & CSV Reports
 
 # 🔒 Security Features
 
-- Password Encryption
+- Password Encryption using bcrypt
 - Secure Login Authentication
 - Protected Pages
 - User-specific Prediction History
@@ -158,27 +183,55 @@ Generate PDF & CSV Reports
 
 ---
 
-# 📈 Future Enhancements
+# 📈 Analytics
 
-- Deep Learning Models
-- Explainable AI (SHAP/LIME)
-- REST API Integration
-- Mobile Application
-- Banking API Integration
-- Real-time Transaction Monitoring
+The application provides:
+
+- Fraud Distribution
+- Genuine Transaction Count
+- Prediction Statistics
+- Interactive Charts
+- Historical Analysis
 
 ---
 
-# 📷 Screenshots
+# 📷 Application Screenshots
 
-> Add screenshots of the following pages:
+> Add screenshots after creating them.
 
-- Dashboard
-- Predict
-- Batch Prediction
-- Analytics
-- History
-- Profile
+## 🏠 Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+---
+
+## 💳 Prediction Page
+
+![Prediction](screenshots/predict.png)
+
+---
+
+## 📂 Batch Prediction
+
+![Batch Prediction](screenshots/batch.png)
+
+---
+
+## 📊 Analytics
+
+![Analytics](screenshots/analytics.png)
+
+---
+
+## 📜 History
+
+![History](screenshots/history.png)
+
+---
+
+## 👤 Profile
+
+![Profile](screenshots/profile.png)
 
 ---
 
@@ -194,6 +247,18 @@ https://github.com/shaikmahammadshajid-crypto/SecurePay-AI
 
 ---
 
+# 🚀 Future Enhancements
+
+- Deep Learning Models
+- Explainable AI (SHAP/LIME)
+- REST API
+- Banking API Integration
+- Mobile Application
+- Live Transaction Monitoring
+- Cloud Deployment Enhancements
+
+---
+
 # 👨‍💻 Author
 
 **Shaik Mahammad Shajid**
@@ -206,8 +271,12 @@ Presidency University
 
 # 📜 License
 
-This project is developed for educational and academic purposes.
+This project is developed for educational and learning purposes.
 
 ---
 
-⭐ If you found this project useful, please consider giving it a star on GitHub.
+<div align="center">
+
+### ⭐ If you found this project helpful, please consider giving it a Star ⭐
+
+</div>
