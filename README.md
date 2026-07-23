@@ -111,7 +111,7 @@ SecurePayAI/
 │
 ├── utils/
 │
-└── screenshots/
+└── images/
 ```
 
 ---
@@ -195,56 +195,58 @@ The application provides:
 
 ---
 
-# 📷 Application Screenshots
-
-> Add screenshots after creating them.
+# 📷 Application Screenshot
 
 ## 🏠 Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](images/dashboard.png)
 
 ---
 
 ## 💳 Prediction Page
 
-![Prediction](screenshots/predict.png)
+![Prediction](images/predict.png)
 
 ---
 
 ## 📂 Batch Prediction
 
-![Batch Prediction](screenshots/batch.png)
+![Batch Prediction](images/batch.png)
 
 ---
 
 ## 📊 Analytics
 
-![Analytics](screenshots/analytics.png)
+![Analytics](images/analytics.png)
 
 ---
 
 ## 📜 History
 
-![History](screenshots/history.png)
+![History](images/history.png)
 
 ---
 
 ## 👤 Profile
 
-![Profile](screenshots/profile.png)
+![Profile](images/profile.png)
 
+---
+
+## ℹ️ About
+
+![About](images/about.png)
 ---
 
 # 🌐 Live Demo
 
-https://securepay-ai-dzwzcfdsgbjt3sam5c62ec.streamlit.app/
+👉 https://securepay-ai-dzwzcfdsgbjt3sam5c62ec.streamlit.app/
 
 ---
 
 # 💻 GitHub Repository
 
-https://github.com/shaikmahammadshajid-crypto/SecurePay-AI
-
+👉 https://github.com/shaikmahammadshajid-crypto/SecurePay-AI
 ---
 
 # 🚀 Future Enhancements
