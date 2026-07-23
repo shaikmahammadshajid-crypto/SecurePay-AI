@@ -1,6 +1,5 @@
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.units import inch
 
 import os
 
@@ -67,10 +66,6 @@ def generate_prediction_report(
 # -------------------------------
 # Batch Prediction PDF Report
 # -------------------------------
-
-import pandas as pd
-
-
 def generate_batch_report(df, username):
     """
     Generate PDF report for batch prediction results.
@@ -81,7 +76,6 @@ def generate_batch_report(df, username):
     filename = f"reports/generated/{username}_batch_report.pdf"
 
     doc = SimpleDocTemplate(filename)
-
     styles = getSampleStyleSheet()
 
     elements = []
@@ -106,17 +100,21 @@ def generate_batch_report(df, username):
         Paragraph(f"<b>Total Transactions:</b> {len(df)}", styles["BodyText"])
     )
 
-    if "Prediction" in df.columns:
+    # Count fraud and genuine transactions
+    if df["Prediction"].dtype == object:
         fraud = (df["Prediction"] == "Fraud").sum()
         genuine = (df["Prediction"] == "Genuine").sum()
+    else:
+        fraud = (df["Prediction"] == 1).sum()
+        genuine = (df["Prediction"] == 0).sum()
 
-        elements.append(
-            Paragraph(f"<b>Fraud Transactions:</b> {fraud}", styles["BodyText"])
-        )
+    elements.append(
+        Paragraph(f"<b>Fraud Transactions:</b> {fraud}", styles["BodyText"])
+    )
 
-        elements.append(
-            Paragraph(f"<b>Genuine Transactions:</b> {genuine}", styles["BodyText"])
-        )
+    elements.append(
+        Paragraph(f"<b>Genuine Transactions:</b> {genuine}", styles["BodyText"])
+    )
 
     doc.build(elements)
 

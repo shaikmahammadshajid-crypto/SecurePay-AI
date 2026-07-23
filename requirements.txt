@@ -4,15 +4,10 @@ numpy
 scikit-learn==1.6.1
 joblib
 plotly
-matplotlib
-seaborn
 shap
-tensorflow
 Pillow
 reportlab
 openpyxl
-
 bcrypt
 streamlit-option-menu
 streamlit-extras
-fpdf2

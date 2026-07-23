@@ -22,4 +22,6 @@ def load_css():
                 unsafe_allow_html=True,
             )
     except FileNotFoundError:
-        st.warning("style.css not found.")
+        st.warning("⚠️ assets/style.css not found.")
+    except Exception as e:
+        st.error(f"Unable to load CSS: {e}")

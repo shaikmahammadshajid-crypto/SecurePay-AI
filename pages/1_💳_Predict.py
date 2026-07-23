@@ -281,7 +281,7 @@ Recommended Actions
     try:
 
         pdf_file = generate_prediction_report(
-            username=st.session_state.username,
+            username=st.session_state.get("username", "Guest"),
             prediction=prediction_text,
             probability=probability_percent,
             amount=amount,

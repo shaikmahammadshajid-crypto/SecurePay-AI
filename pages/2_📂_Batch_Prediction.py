@@ -69,61 +69,127 @@ if uploaded_file:
 
     # Reorder columns to exactly match the model
     df = df[expected_columns]
+    # Verify the dataset has exactly 30 features
+
+    if df.shape[1] != 30:
+        st.error("❌ Expected exactly 30 input features.")
+        st.stop()
+
+
+    # Convert all values to numeric
+    df = df.apply(pd.to_numeric, errors="coerce")
+
+    # Check for invalid or missing values
+    if df.isnull().values.any():
+        st.error("❌ The uploaded CSV contains invalid or missing values.")
+        st.stop()
+
     # --------------------------------------------------
-# Predict Button
-# --------------------------------------------------
+    # Predict Button
+    # --------------------------------------------------
 
-if st.button("🚀 Predict All", use_container_width=True):
+    if st.button("🚀 Predict All", use_container_width=True):
 
-    with st.spinner("🔍 Running AI Fraud Detection..."):
+        with st.spinner("🔍 Running AI Fraud Detection..."):
 
-        # Scale Data
-        scaled = scaler.transform(df)
+            # Scale Data
+            scaled = scaler.transform(df)
 
-        # Make Predictions
-        predictions = model.predict(scaled)
-        probabilities = model.predict_proba(scaled)[:, 1]
+            # Make Predictions
+            predictions = model.predict(scaled)
+            probabilities = model.predict_proba(scaled)[:, 1]
 
-        # Create Results DataFrame
-        results = df.copy()
-        results["Prediction"] = predictions
-        results["Fraud Probability"] = probabilities
+            # Create Results DataFrame
+            results = df.copy()
+            results["Prediction"] = predictions
+            results["Fraud Probability"] = probabilities
 
-        # Calculate Statistics
-        fraud = (predictions == 1).sum()
-        genuine = (predictions == 0).sum()
+            # Calculate Statistics
+            fraud = (predictions == 1).sum()
+            genuine = (predictions == 0).sum()
 
-        total_transactions = len(results)
-        fraud_transactions = int(fraud)
-        genuine_transactions = int(genuine)
-        fraud_rate = round((fraud / total_transactions) * 100, 2)
+            total_transactions = len(results)
+            fraud_transactions = int(fraud)
+            genuine_transactions = int(genuine)
+            fraud_rate = round((fraud / total_transactions) * 100, 2)
 
-        # Save Batch History
-        conn = get_connection()
-        cursor = conn.cursor()
+            # Save Batch History
+            conn = get_connection()
+            cursor = conn.cursor()
 
-        cursor.execute(
-            """
-            INSERT INTO batch_predictions
-            (
-                username,
-                filename,
-                total,
-                fraud,
-                genuine,
-                fraud_rate
+            cursor.execute(
+                """
+                INSERT INTO batch_predictions
+                (
+                    username,
+                    filename,
+                    total,
+                    fraud,
+                    genuine,
+                    fraud_rate
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    st.session_state.get("username","Guest"),
+                    uploaded_file.name,
+                    total_transactions,
+                    fraud_transactions,
+                    genuine_transactions,
+                    fraud_rate,
+                ),
             )
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                st.session_state.username,
-                uploaded_file.name,
-                total_transactions,
-                fraud_transactions,
-                genuine_transactions,
-                fraud_rate,
-            ),
-        )
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
+            st.success("✅ Batch Prediction Completed!")
+
+
+
+            #   Show summary
+            c1, c2, c3 = st.columns(3)
+
+            c1.metric("Total Transactions", total_transactions)
+            c2.metric("Fraud", fraud_transactions)
+            c3.metric("Genuine", genuine_transactions)
+
+            st.metric("Fraud Rate", f"{fraud_rate}%")
+
+            st.divider()
+
+            # Show prediction results
+            st.subheader("Prediction Results")
+            st.dataframe(results, use_container_width=True)
+
+            # Download CSV
+            csv = results.to_csv(index=False).encode("utf-8")
+
+            st.download_button(
+                "📥 Download Results CSV",
+                data=csv,
+                file_name="batch_predictions.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+
+
+            # Generate PDF
+            try:
+                pdf_file = generate_batch_report(
+                    username=st.session_state.get("username", "Guest"),
+                    df=results,
+                )
+
+
+                with open(pdf_file, "rb") as f:
+                    st.download_button(
+                        "📄 Download PDF Report",
+                        data=f,
+                        file_name="Batch_Report.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                    )
+
+            except Exception as e:
+             
+              st.error(f"PDF Error: {e}")
