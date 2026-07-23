@@ -1,7 +1,7 @@
 streamlit==1.45.1
 pandas
 numpy
-scikit-learn
+scikit-learn==1.6.1
 joblib
 plotly
 matplotlib
@@ -11,3 +11,8 @@ tensorflow
 Pillow
 reportlab
 openpyxl
+
+bcrypt
+streamlit-option-menu
+streamlit-extras
+fpdf2
