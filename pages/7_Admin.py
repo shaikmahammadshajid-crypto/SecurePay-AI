@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from config import setup_page, load_css
-from utils.auth_guard import require_login
+from utils.admin_guard import require_admin
 from utils.ai_assistant import render_ai_assistant
 from database.admin import (
     get_all_users,
@@ -12,7 +12,7 @@ from database.admin import (
 
 setup_page()
 load_css()
-require_login()
+require_admin()
 render_ai_assistant("admin")
 
 st.title("🛠 SecurePay AI Admin Dashboard")

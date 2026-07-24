@@ -105,14 +105,23 @@ def create_tables():
     """)
 
     # Keep older local databases compatible with the current app code.
+    ensure_column(cursor, "users", "role", "TEXT DEFAULT 'user'")
+    ensure_column(cursor, "users", "created_at", "TIMESTAMP")
     ensure_column(cursor, "predictions", "transaction_id", "TEXT")
     ensure_column(cursor, "predictions", "risk_level", "TEXT")
     ensure_column(cursor, "batch_predictions", "fraud_rate", "REAL")
+
+    cursor.execute(
+        "UPDATE users SET role = 'user' WHERE role IS NULL OR role = ''"
+    )
+    cursor.execute(
+        "UPDATE users SET role = 'admin' WHERE username = ?",
+        ("admin",)
+    )
 
     conn.commit()
     conn.close()
 
 
 create_tables()
-
 

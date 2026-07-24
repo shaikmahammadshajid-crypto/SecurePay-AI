@@ -3,24 +3,23 @@ import pandas as pd
 
 from config import setup_page, load_css
 from utils.ai_assistant import render_ai_assistant
+from utils.demo_data import load_dashboard_data
 
 setup_page()
 load_css()
 render_ai_assistant("about")
 
-st.title("ℹ️ About SecurePay AI")
-
 st.markdown("""
-## 🛡️ Enterprise Credit Card Fraud Detection System
-
-SecurePay AI is an intelligent fraud detection platform that uses
-Machine Learning to identify fraudulent credit card transactions
-in real time.
-
-The application enables financial institutions and businesses to
-predict fraud, analyze transaction patterns, generate reports,
-and visualize fraud trends through an interactive dashboard.
-""")
+<div class="hero-panel">
+    <div class="hero-kicker">System Overview</div>
+    <div class="hero-title">About SecurePay AI</div>
+    <p class="hero-copy">
+        SecurePay AI is a fraud detection workspace for scoring card
+        transactions, reviewing risk, explaining model output, and keeping
+        analyst-ready evidence for operational decisions.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
@@ -99,7 +98,7 @@ st.divider()
 st.header("📂 Dataset Information")
 
 try:
-    df = pd.read_csv("dataset/creditcard.csv")
+    df, is_demo_data = load_dashboard_data()
 
     total = len(df)
     fraud = len(df[df["Class"] == 1])
@@ -110,6 +109,9 @@ try:
     c1.metric("Transactions", f"{total:,}")
     c2.metric("Fraud", fraud)
     c3.metric("Genuine", genuine)
+
+    if is_demo_data:
+        st.info("Showing generated dashboard sample data for public deployment.")
 
 except:
     st.info("Dataset statistics unavailable.")
@@ -246,7 +248,7 @@ st.divider()
 # FEATURES
 # ==========================================================
 
-st.header("🚀 Current Features")
+st.header("Current Capabilities")
 
 features = [
 
@@ -260,16 +262,24 @@ features = [
 
 "Risk Classification",
 
-"Download CSV",
+"CSV and PDF Downloads",
 
 "Professional Dashboard",
 
-"Responsive UI"
+"Responsive UI",
+
+"Secure Authentication",
+
+"Admin Monitoring",
+
+"Prediction History",
+
+"AI Fraud Analyst Guidance"
 
 ]
 
 for feature in features:
-    st.write("✅",feature)
+    st.write("✅", feature)
 
 st.divider()
 
@@ -277,17 +287,9 @@ st.divider()
 # FUTURE
 # ==========================================================
 
-st.header("🔮 Future Enhancements")
+st.header("Future Enhancements")
 
 future = [
-
-"User Authentication",
-
-"Admin Dashboard",
-
-"Prediction History",
-
-"PDF Reports",
 
 "REST API",
 
@@ -295,12 +297,18 @@ future = [
 
 "Cloud Deployment",
 
-"Live Transaction Monitoring"
+"Live Transaction Monitoring",
+
+"Real Payment Gateway Integration",
+
+"Device and Location Risk Signals",
+
+"Model Retraining Pipeline"
 
 ]
 
 for item in future:
-    st.write("🚀",item)
+    st.write("🚀", item)
 
 st.divider()
 

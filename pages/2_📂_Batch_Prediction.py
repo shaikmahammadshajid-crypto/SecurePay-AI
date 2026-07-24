@@ -7,7 +7,7 @@ import streamlit as st
 import pandas as pd
 
 from config import setup_page, load_css
-from utils.ai_assistant import render_ai_assistant
+from utils.ai_assistant import render_ai_assistant, render_batch_ai_assessment
 from utils.model_loader import load_model, load_scaler
 
 # --------------------------------------------------
@@ -19,8 +19,18 @@ load_css()
 require_login()
 render_ai_assistant("batch")
 
-st.title("📂 Batch Prediction")
-st.caption("Predict fraud for thousands of transactions.")
+st.markdown("""
+<div class="hero-panel">
+    <div class="hero-kicker">Bulk Fraud Screening</div>
+    <div class="hero-title">Batch Transaction Review</div>
+    <p class="hero-copy">
+        Upload a transaction CSV, score every payment, identify the riskiest
+        cases, and export reports for operational follow-up.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+st.divider()
 
 # --------------------------------------------------
 # Load Model
@@ -156,6 +166,15 @@ if uploaded_file:
             c3.metric("Genuine", genuine_transactions)
 
             st.metric("Fraud Rate", f"{fraud_rate}%")
+
+            st.divider()
+
+            render_batch_ai_assessment(
+                total=total_transactions,
+                fraud=fraud_transactions,
+                genuine=genuine_transactions,
+                fraud_rate=fraud_rate,
+            )
 
             st.divider()
 

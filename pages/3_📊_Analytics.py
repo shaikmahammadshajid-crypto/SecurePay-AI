@@ -3,14 +3,26 @@ import pandas as pd
 import plotly.express as px
 
 from config import setup_page, load_css
+from utils.auth_guard import require_login
 from utils.ai_assistant import render_ai_assistant
 
 setup_page()
 load_css()
+require_login()
 render_ai_assistant("analytics")
 
-st.title("📊 SecurePay AI Analytics")
-st.caption("Interactive fraud analytics dashboard")
+st.markdown("""
+<div class="hero-panel">
+    <div class="hero-kicker">Fraud Intelligence</div>
+    <div class="hero-title">Analytics Dashboard</div>
+    <p class="hero-copy">
+        Explore labeled transaction data, measure fraud concentration, inspect
+        amount patterns, and understand the signals behind model decisions.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+st.divider()
 
 uploaded_file = st.file_uploader(
     "Upload credit card dataset",

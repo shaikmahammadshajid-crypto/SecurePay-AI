@@ -7,7 +7,10 @@ import pandas as pd
 from config import setup_page, load_css
 
 from utils.auth_guard import require_login
-from utils.ai_assistant import render_ai_assistant
+from utils.ai_assistant import (
+    render_ai_assistant,
+    render_transaction_ai_assessment,
+)
 from utils.model_loader import load_model, load_scaler
 from utils.prediction import predict_transaction
 from utils.charts import fraud_gauge
@@ -40,8 +43,16 @@ scaler = load_scaler()
 # Header
 # -----------------------------
 
-st.title("💳 SecurePay AI")
-st.caption("AI Powered Credit Card Fraud Detection System")
+st.markdown("""
+<div class="hero-panel">
+    <div class="hero-kicker">Single Transaction Review</div>
+    <div class="hero-title">Payment Risk Scoring</div>
+    <p class="hero-copy">
+        Enter a transaction profile, receive fraud probability, review the AI
+        analyst recommendation, and save the result to audit history.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
@@ -174,6 +185,13 @@ if predict_button:
     st.progress(probability)
 
     st.info(f"💡 Recommendation: {recommendation}")
+
+    render_transaction_ai_assessment(
+        prediction=prediction,
+        probability=probability,
+        amount=amount,
+        risk_level=risk_level,
+    )
 
     st.divider()
 
