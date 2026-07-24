@@ -26,7 +26,7 @@ def get_all_predictions():
 
     cursor.execute("""
     SELECT *
-    FROM predictions
+    FROM prediction_history
     ORDER BY created_at DESC
     """)
 
@@ -45,12 +45,12 @@ def get_dashboard_stats():
     cursor.execute("SELECT COUNT(*) FROM users")
     users = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM predictions")
+    cursor.execute("SELECT COUNT(*) FROM prediction_history")
     predictions = cursor.fetchone()[0]
 
     cursor.execute("""
         SELECT COUNT(*)
-        FROM predictions
+        FROM prediction_history
         WHERE prediction LIKE '%Fraud%'
     """)
     frauds = cursor.fetchone()[0]

@@ -13,6 +13,16 @@ def get_connection():
     return conn
 
 
+def ensure_column(cursor, table_name, column_name, column_definition):
+    cursor.execute(f"PRAGMA table_info({table_name})")
+    columns = {row["name"] for row in cursor.fetchall()}
+
+    if column_name not in columns:
+        cursor.execute(
+            f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}"
+        )
+
+
 def create_tables():
 
     conn = get_connection()
@@ -57,9 +67,11 @@ def create_tables():
     CREATE TABLE IF NOT EXISTS predictions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT,
+        transaction_id TEXT,
         probability REAL,
         prediction TEXT,
         amount REAL,
+        risk_level TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -73,12 +85,34 @@ def create_tables():
         total INTEGER,
         fraud INTEGER,
         genuine INTEGER,
+        fraud_rate REAL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+
+    # ================= PREDICTION HISTORY =================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS prediction_history(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        transaction_id TEXT,
+        prediction TEXT,
+        probability REAL,
+        amount REAL,
+        risk_level TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Keep older local databases compatible with the current app code.
+    ensure_column(cursor, "predictions", "transaction_id", "TEXT")
+    ensure_column(cursor, "predictions", "risk_level", "TEXT")
+    ensure_column(cursor, "batch_predictions", "fraud_rate", "REAL")
 
     conn.commit()
     conn.close()
 
 
 create_tables()
+
+

@@ -20,7 +20,7 @@ if not history:
     st.info("No prediction history available.")
     st.stop()
 
-df = pd.DataFrame(history)
+df = pd.DataFrame([dict(row) for row in history])
 
 st.dataframe(
     df,
