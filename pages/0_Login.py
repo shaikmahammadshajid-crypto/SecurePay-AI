@@ -1,6 +1,12 @@
 import streamlit as st
 
+from config import setup_page, load_css
 from database.auth import login, register
+from utils.ai_assistant import render_ai_assistant
+
+setup_page()
+load_css()
+render_ai_assistant("login")
 
 if st.session_state.get("logged_in", False):
     st.switch_page("app.py")

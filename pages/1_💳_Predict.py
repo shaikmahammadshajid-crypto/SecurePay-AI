@@ -7,6 +7,7 @@ import pandas as pd
 from config import setup_page, load_css
 
 from utils.auth_guard import require_login
+from utils.ai_assistant import render_ai_assistant
 from utils.model_loader import load_model, load_scaler
 from utils.prediction import predict_transaction
 from utils.charts import fraud_gauge
@@ -30,6 +31,7 @@ setup_page()
 load_css()
 
 require_login()
+render_ai_assistant("predict")
 
 model = load_model()
 scaler = load_scaler()

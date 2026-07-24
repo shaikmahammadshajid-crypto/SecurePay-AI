@@ -3,6 +3,7 @@ import pandas as pd
 
 from config import setup_page, load_css
 from utils.auth_guard import require_login
+from utils.ai_assistant import render_ai_assistant
 from database.admin import (
     get_all_users,
     get_all_predictions,
@@ -12,6 +13,7 @@ from database.admin import (
 setup_page()
 load_css()
 require_login()
+render_ai_assistant("admin")
 
 st.title("🛠 SecurePay AI Admin Dashboard")
 

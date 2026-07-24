@@ -3,9 +3,11 @@ import pandas as pd
 import plotly.express as px
 
 from config import setup_page, load_css
+from utils.ai_assistant import render_ai_assistant
 
 setup_page()
 load_css()
+render_ai_assistant("analytics")
 
 st.title("📊 SecurePay AI Analytics")
 st.caption("Interactive fraud analytics dashboard")

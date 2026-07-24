@@ -7,6 +7,7 @@ import streamlit as st
 import pandas as pd
 
 from config import setup_page, load_css
+from utils.ai_assistant import render_ai_assistant
 from utils.model_loader import load_model, load_scaler
 
 # --------------------------------------------------
@@ -16,6 +17,7 @@ from utils.model_loader import load_model, load_scaler
 setup_page()
 load_css()
 require_login()
+render_ai_assistant("batch")
 
 st.title("📂 Batch Prediction")
 st.caption("Predict fraud for thousands of transactions.")

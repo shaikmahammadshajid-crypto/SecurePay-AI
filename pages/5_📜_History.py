@@ -3,12 +3,14 @@ import pandas as pd
 
 from config import setup_page, load_css
 from utils.auth_guard import require_login
+from utils.ai_assistant import render_ai_assistant
 from database.history import get_user_history
 
 setup_page()
 load_css()
 
 require_login()
+render_ai_assistant("history")
 
 st.title("📜 Prediction History")
 

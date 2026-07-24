@@ -9,11 +9,13 @@ import pandas as pd
 
 from config import setup_page, load_css
 from utils.auth_guard import require_login
+from utils.ai_assistant import render_ai_assistant
 
 setup_page()
 load_css()
 
 require_login()
+render_ai_assistant("dashboard")
 
 # ===========================
 # HEADER

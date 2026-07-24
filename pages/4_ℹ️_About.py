@@ -2,9 +2,11 @@ import streamlit as st
 import pandas as pd
 
 from config import setup_page, load_css
+from utils.ai_assistant import render_ai_assistant
 
 setup_page()
 load_css()
+render_ai_assistant("about")
 
 st.title("ℹ️ About SecurePay AI")
 
