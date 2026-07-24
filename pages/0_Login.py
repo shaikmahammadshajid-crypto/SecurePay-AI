@@ -148,4 +148,7 @@ with right:
 </div>
 """, unsafe_allow_html=True)
 
-    st.info("Admin demo: username `admin`, password `admin123`.")
+    st.info(
+        "Admin access is owner-controlled. Set `SECUREPAY_ADMIN_PASSWORD` "
+        "before deployment to create an admin account."
+    )

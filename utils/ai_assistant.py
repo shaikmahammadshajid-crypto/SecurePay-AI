@@ -90,7 +90,10 @@ ANSWERS = {
         "Open Register, enter a unique username, unique email, and a password with at least 6 characters. "
         "The password is stored only as a bcrypt hash."
     ),
-    "admin account": "Default admin credentials are username admin and password admin123.",
+    "admin account": (
+        "Admin access is configured by the deployment owner. Set SECUREPAY_ADMIN_PASSWORD "
+        "before first run to create an admin account."
+    ),
     "where should i start": (
         "Use Predict for one transaction, Batch Prediction for a CSV screening job, and Analytics for "
         "understanding labeled fraud patterns."

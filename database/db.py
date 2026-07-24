@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from pathlib import Path
 import bcrypt
@@ -40,18 +41,19 @@ def create_tables():
     )
     """)
 
-    # Create default admin if it doesn't exist
+    # Create an admin only when an explicit deployment password is configured.
     cursor.execute(
         "SELECT * FROM users WHERE username=?",
         ("admin",)
     )
 
-    if cursor.fetchone() is None:
+    admin_password = os.getenv("SECUREPAY_ADMIN_PASSWORD")
+
+    if cursor.fetchone() is None and admin_password:
         hashed = bcrypt.hashpw(
-            "admin123".encode(),
+            admin_password.encode(),
             bcrypt.gensalt()
         ).decode()
-
         cursor.execute("""
         INSERT INTO users(username,email,password,role)
         VALUES(?,?,?,?)
@@ -114,14 +116,14 @@ def create_tables():
     cursor.execute(
         "UPDATE users SET role = 'user' WHERE role IS NULL OR role = ''"
     )
-    cursor.execute(
-        "UPDATE users SET role = 'admin' WHERE username = ?",
-        ("admin",)
-    )
+    if admin_password:
+        cursor.execute(
+            "UPDATE users SET role = 'admin' WHERE username = ?",
+            ("admin",)
+        )
 
     conn.commit()
     conn.close()
 
 
 create_tables()
-
