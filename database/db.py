@@ -1,10 +1,10 @@
 import sqlite3
 from pathlib import Path
+import bcrypt
 
-# Create database directory if it doesn't exist
-Path("database").mkdir(exist_ok=True)
-
-DB_PATH = Path("database/securepay.db")
+# Absolute path to the database
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / "securepay.db"
 
 
 def get_connection():
@@ -18,70 +18,61 @@ def create_tables():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # ==========================
-    # USERS TABLE
-    # ==========================
+    # ================= USERS =================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users(
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
         username TEXT UNIQUE NOT NULL,
-
         email TEXT UNIQUE NOT NULL,
-
         password TEXT NOT NULL,
-
         role TEXT DEFAULT 'user',
-
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
-    # ==========================
-    # SINGLE PREDICTIONS
-    # ==========================
+    # Create default admin if it doesn't exist
+    cursor.execute(
+        "SELECT * FROM users WHERE username=?",
+        ("admin",)
+    )
+
+    if cursor.fetchone() is None:
+        hashed = bcrypt.hashpw(
+            "admin123".encode(),
+            bcrypt.gensalt()
+        ).decode()
+
+        cursor.execute("""
+        INSERT INTO users(username,email,password,role)
+        VALUES(?,?,?,?)
+        """, (
+            "admin",
+            "admin@securepay.ai",
+            hashed,
+            "admin"
+        ))
+
+    # ================= SINGLE PREDICTIONS =================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS predictions(
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-        username TEXT NOT NULL,
-
-        transaction_id TEXT,
-
-        prediction TEXT,
-
+        username TEXT,
         probability REAL,
-
+        prediction TEXT,
         amount REAL,
-
-        risk_level TEXT,
-
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
-    # ==========================
-    # BATCH PREDICTIONS
-    # ==========================
+    # ================= BATCH PREDICTIONS =================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS batch_predictions(
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-        username TEXT NOT NULL,
-
+        username TEXT,
         filename TEXT,
-
         total INTEGER,
-
         fraud INTEGER,
-
         genuine INTEGER,
-
-        fraud_rate REAL,
-
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
