@@ -244,6 +244,25 @@ The application provides:
 
 ---
 
+# 🚀 Deploy on Render
+
+This repository includes `render.yaml` for one-click Render deployment.
+
+Render settings:
+
+- Repository: `shaikmahammadshajid-crypto/SecurePay-AI`
+- Branch: `main`
+- Runtime: Python
+- Build command: `pip install -r requirements.txt`
+- Start command: `streamlit run app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true`
+- Optional environment variable: `SECUREPAY_ADMIN_PASSWORD`
+
+Deploy link:
+
+👉 https://dashboard.render.com/blueprint/new?repo=https://github.com/shaikmahammadshajid-crypto/SecurePay-AI
+
+---
+
 # 💻 GitHub Repository
 
 👉 https://github.com/shaikmahammadshajid-crypto/SecurePay-AI
