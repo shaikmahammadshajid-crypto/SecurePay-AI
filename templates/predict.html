@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero compact">
+    <div>
+        <span class="kicker">Single transaction review</span>
+        <h1>Payment Risk Scoring</h1>
+        <p>Enter the 30 model features and save the fraud decision to your audit history.</p>
+    </div>
+</section>
+
+<form class="panel" method="post">
+    <div class="field-grid">
+        {% for column in feature_columns %}
+        <label>{{ column }}<input name="{{ column }}" type="number" step="any" value="{{ form_values[column] }}" required></label>
+        {% endfor %}
+    </div>
+    <button type="submit">Predict Transaction</button>
+</form>
+
+{% if result %}
+<section class="result-band {{ 'danger' if 'Fraud' in result.prediction else 'success' }}">
+    <div><span>Transaction ID</span><strong>{{ result.transaction_id }}</strong></div>
+    <div><span>Prediction</span><strong>{{ result.prediction }}</strong></div>
+    <div><span>Fraud Probability</span><strong>{{ result.probability }}%</strong></div>
+    <div><span>Risk Level</span><strong>{{ result.risk_level }}</strong></div>
+</section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>AI Fraud Analyst</h2>
+        <p><strong>{{ result.assessment.decision }}</strong></p>
+        <p>{{ result.assessment.summary }}</p>
+    </div>
+    <div class="panel">
+        <h2>Recommended Action</h2>
+        <p><strong>{{ result.assessment.action }}</strong></p>
+        <p>{{ result.assessment.review }}</p>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

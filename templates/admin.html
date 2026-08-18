@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero compact">
+    <div>
+        <span class="kicker">Administrator console</span>
+        <h1>Admin</h1>
+        <p>Monitor users, prediction logs, fraud totals, and batch activity.</p>
+    </div>
+</section>
+
+<section class="metrics">
+    <div><span>Users</span><strong>{{ stats.users }}</strong></div>
+    <div><span>Predictions</span><strong>{{ stats.predictions }}</strong></div>
+    <div><span>Frauds</span><strong>{{ stats.frauds }}</strong></div>
+    <div><span>Batch Jobs</span><strong>{{ stats.batches }}</strong></div>
+</section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>Registered Users</h2>
+        {% set rows = users %}
+        {% include "partials/simple_table.html" %}
+    </div>
+    <div class="panel">
+        <h2>Prediction Logs</h2>
+        {% set rows = logs %}
+        {% include "partials/simple_table.html" %}
+    </div>
+</section>
+{% endblock %}

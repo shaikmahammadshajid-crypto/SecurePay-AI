@@ -1,0 +1,372 @@
+:root {
+    --bg: #f5f7fb;
+    --panel: #ffffff;
+    --ink: #152033;
+    --muted: #66758a;
+    --line: #d9e1eb;
+    --primary: #0f766e;
+    --primary-dark: #0b5f59;
+    --accent: #2457c5;
+    --danger: #b42318;
+    --success: #12733b;
+    --warning: #a16207;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+    color: inherit;
+}
+
+.app-shell {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: #11283f;
+    color: #eef8f7;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: #0f766e;
+    font-weight: 800;
+}
+
+.brand small,
+.session-box span {
+    display: block;
+    color: #b9c8d4;
+}
+
+.nav {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.nav a,
+.session-box a {
+    text-decoration: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    color: #eef8f7;
+}
+
+.nav a:hover,
+.session-box a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.session-box {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 1rem;
+}
+
+.content {
+    padding: 1.5rem;
+    max-width: 1320px;
+    width: 100%;
+}
+
+.hero {
+    background: linear-gradient(135deg, #ffffff, #e9f7f4 62%, #eaf1ff);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1.6rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: end;
+    box-shadow: 0 18px 45px rgba(20, 33, 61, 0.08);
+    margin-bottom: 1rem;
+}
+
+.hero.compact {
+    align-items: start;
+}
+
+.hero h1 {
+    margin: 0.25rem 0;
+    font-size: 2.2rem;
+    line-height: 1.1;
+}
+
+.hero p {
+    max-width: 780px;
+    margin: 0;
+    color: #334155;
+}
+
+.kicker {
+    color: var(--primary-dark);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(110px, 1fr));
+    gap: 0.6rem;
+}
+
+.hero-metrics span,
+.metrics div,
+.panel,
+.result-band {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.hero-metrics span {
+    padding: 0.8rem;
+}
+
+.hero-metrics strong,
+.metrics strong {
+    display: block;
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin: 1rem 0;
+}
+
+.metrics div {
+    padding: 1rem;
+}
+
+.metrics span,
+.result-band span,
+.muted {
+    color: var(--muted);
+}
+
+.grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel {
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.panel h2 {
+    margin: 0 0 0.75rem;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+}
+
+label {
+    display: grid;
+    gap: 0.35rem;
+    font-weight: 700;
+}
+
+input,
+textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: var(--ink);
+    background: #fff;
+    font: inherit;
+}
+
+button,
+.button-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 2.7rem;
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.65rem 1rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button:hover,
+.button-link:hover {
+    background: var(--primary-dark);
+}
+
+.button-row,
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 1rem 0;
+}
+
+.quick-actions a {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem;
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.result-band {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.7rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 5px solid var(--accent);
+}
+
+.result-band.success {
+    border-left-color: var(--success);
+}
+
+.result-band.danger {
+    border-left-color: var(--danger);
+}
+
+.status-ok {
+    color: var(--success);
+    font-weight: 800;
+}
+
+.status-attention {
+    color: var(--warning);
+    font-weight: 800;
+}
+
+.alerts {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.alert {
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    background: #e8f2ff;
+    border: 1px solid #b8d2ff;
+}
+
+.alert-error {
+    background: #fff1f0;
+    border-color: #ffc9c2;
+}
+
+.alert-success {
+    background: #ecfdf3;
+    border-color: #bbf7d0;
+}
+
+.alert-warning {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.table-wrap {
+    max-width: 100%;
+    overflow: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th,
+td {
+    border-bottom: 1px solid var(--line);
+    padding: 0.65rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #f0f5f9;
+    position: sticky;
+    top: 0;
+}
+
+@media (max-width: 980px) {
+    .app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+    }
+
+    .nav,
+    .hero,
+    .split,
+    .grid.two,
+    .metrics,
+    .result-band,
+    .field-grid,
+    .hero-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        display: grid;
+    }
+}

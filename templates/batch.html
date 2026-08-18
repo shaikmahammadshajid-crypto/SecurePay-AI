@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero compact">
+    <div>
+        <span class="kicker">Bulk fraud screening</span>
+        <h1>Batch Prediction</h1>
+        <p>Upload a CSV with Time, V1-V28, and Amount. Class is allowed and ignored during scoring.</p>
+    </div>
+</section>
+
+<form class="panel" method="post" enctype="multipart/form-data">
+    <label>CSV File<input name="csv_file" type="file" accept=".csv" required></label>
+    <button type="submit">Predict Batch</button>
+</form>
+
+{% if result %}
+<section class="metrics">
+    <div><span>Total</span><strong>{{ result.total }}</strong></div>
+    <div><span>Fraud</span><strong>{{ result.fraud }}</strong></div>
+    <div><span>Genuine</span><strong>{{ result.genuine }}</strong></div>
+    <div><span>Fraud Rate</span><strong>{{ result.fraud_rate }}%</strong></div>
+</section>
+
+<section class="panel">
+    <h2>AI Batch Summary</h2>
+    <p>{{ result.assessment.summary }}</p>
+    <p><strong>{{ result.assessment.action }}</strong></p>
+    <a class="button-link" download="batch_predictions.csv" href="{{ result.csv_data_uri }}">Download Results CSV</a>
+</section>
+
+<section class="panel">
+    <h2>Preview</h2>
+    {% include "partials/table.html" with context %}
+</section>
+{% endif %}
+{% endblock %}

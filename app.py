@@ -1,294 +1,468 @@
-from utils.dashboard import (
-    fraud_pie_chart,
-    amount_histogram,
-    time_chart,
+import os
+import uuid
+from functools import wraps
+from urllib.parse import quote
+
+import pandas as pd
+from flask import (
+    Flask,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    session,
+    url_for,
 )
 
-import streamlit as st
-import pandas as pd
+from database.admin import get_all_predictions, get_all_users, get_dashboard_stats
+from database.auth import authenticate, normalize_username, register_account
+from database.db import get_connection
+from database.history import get_user_history, save_prediction
+from database.profile import get_user_profile
+from utils.ai_assistant import (
+    detect_app_intent,
+    get_assistant_answer,
+    get_batch_assessment,
+    get_transaction_assessment,
+    summarize_user_history,
+)
+from utils.app_health import get_app_health, health_summary
+from utils.helpers import (
+    get_prediction_text,
+    get_recommendation,
+    get_risk_level,
+    probability_to_percentage,
+)
+from utils.model_loader import load_model, load_scaler
+from utils.prediction import FEATURE_COLUMNS, predict_batch, predict_transaction
 
-from config import setup_page, load_css
-from utils.auth_guard import require_login
-from utils.ai_assistant import render_ai_assistant
-from utils.demo_data import load_dashboard_data
 
-setup_page()
-load_css()
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "securepay-dev-secret-change-me")
 
-require_login()
-render_ai_assistant("dashboard")
 
-# ===========================
-# HEADER
-# ===========================
+ROUTES = {
+    "dashboard": "dashboard",
+    "predict": "predict",
+    "batch": "batch",
+    "analytics": "analytics",
+    "history": "history",
+    "profile": "profile",
+    "admin": "admin",
+    "assistant": "assistant",
+    "about": "about",
+}
 
-st.markdown("""
-<div class="hero-panel">
-    <div class="hero-kicker">Live Fraud Operations Workspace</div>
-    <div class="hero-title">SecurePay AI</div>
-    <p class="hero-copy">
-        Score suspicious payments, investigate risk, export evidence, and monitor
-        transaction activity from one analyst-friendly dashboard.
-    </p>
-    <div class="status-strip">
-        <div class="status-pill"><strong>99.96%</strong><span>Model accuracy</span></div>
-        <div class="status-pill"><strong>&lt;100 ms</strong><span>Single prediction</span></div>
-        <div class="status-pill"><strong>30</strong><span>Transaction signals</span></div>
-        <div class="status-pill"><strong>SQLite</strong><span>Audit storage</span></div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
-st.divider()
+def login_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not session.get("logged_in"):
+            flash("Please login first.", "warning")
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
 
-# ===========================
-# MODEL INFO
-# ===========================
+    return wrapped
 
-c1, c2, c3, c4 = st.columns(4)
 
-c1.metric("Accuracy", "99.96%")
-c2.metric("Prediction", "<100 ms")
-c3.metric("Model", "Random Forest")
-c4.metric("Features", "30")
+def admin_required(view):
+    @wraps(view)
+    @login_required
+    def wrapped(*args, **kwargs):
+        if session.get("role") != "admin":
+            flash("Administrator access is required.", "error")
+            return redirect(url_for("dashboard"))
+        return view(*args, **kwargs)
 
-st.divider()
+    return wrapped
 
-# ===========================
-# QUICK ACTIONS
-# ===========================
 
-st.subheader("Analyst Workflow")
+@app.context_processor
+def inject_layout_context():
+    return {
+        "current_username": session.get("username"),
+        "current_role": session.get("role"),
+    }
 
-col1, col2, col3, col4 = st.columns(4)
 
-with col1:
-    st.markdown("""
-<div class="section-card">
-    <h3>Score One Payment</h3>
-    <p>Run a single transaction through the model and get fraud-response guidance.</p>
-</div>
-""", unsafe_allow_html=True)
-    st.page_link("pages/1_💳_Predict.py", label="Open Predict")
+@app.get("/health")
+def health():
+    checks = get_app_health(username=session.get("username"))
+    summary = health_summary(checks)
+    status_code = 200 if summary["status"] == "ok" else 503
+    return {
+        "status": summary["status"],
+        "message": summary["message"],
+        "checks": checks,
+    }, status_code
 
-with col2:
-    st.markdown("""
-<div class="section-card">
-    <h3>Screen a Batch</h3>
-    <p>Upload a CSV, classify every row, and prioritize cases for review.</p>
-</div>
-""", unsafe_allow_html=True)
-    st.page_link("pages/2_📂_Batch_Prediction.py", label="Open Batch")
 
-with col3:
-    st.markdown("""
-<div class="section-card">
-    <h3>Investigate Trends</h3>
-    <p>Use charts and distributions to understand fraud behavior in labeled data.</p>
-</div>
-""", unsafe_allow_html=True)
-    st.page_link("pages/3_📊_Analytics.py", label="Open Analytics")
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if session.get("logged_in"):
+        return redirect(url_for("dashboard"))
 
-with col4:
-    st.markdown("""
-<div class="section-card">
-    <h3>Review the System</h3>
-    <p>See the architecture, model details, dataset format, and project scope.</p>
-</div>
-""", unsafe_allow_html=True)
-    st.page_link("pages/4_ℹ️_About.py", label="Open About")
+    if request.method == "POST":
+        action = request.form.get("action")
 
-st.divider()
+        if action == "register":
+            username = request.form.get("username", "")
+            email = request.form.get("email", "")
+            password = request.form.get("password", "")
+            success, message = register_account(username, email, password)
+            if success:
+                session["logged_in"] = True
+                session["username"] = normalize_username(username)
+                session["role"] = "user"
+                flash("Account created and signed in.", "success")
+                return redirect(url_for("dashboard"))
 
-# ===========================
-# LIVE DASHBOARD
-# ===========================
+            flash(message, "error")
+            return redirect(url_for("login"))
 
-st.subheader("Live Risk Dashboard")
-
-try:
-
-    df, is_demo_data = load_dashboard_data()
-
-    total = len(df)
-    fraud = len(df[df["Class"] == 1])
-    genuine = len(df[df["Class"] == 0])
-
-    c1, c2, c3 = st.columns(3)
-
-    fraud_rate = fraud / total * 100
-
-    c1.metric("Transactions", f"{total:,}")
-    c2.metric("Fraud Cases", f"{fraud:,}")
-    c3.metric("Genuine Cases", f"{genuine:,}")
-
-    st.markdown(f"""
-<div class="trust-band">
-    <p><strong>Operational note:</strong> Fraud appears in {fraud_rate:.3f}% of this dataset.
-    This is realistic for card payments, so analysts should review probability, risk level,
-    and explainability instead of relying on accuracy alone.</p>
-</div>
-""", unsafe_allow_html=True)
-
-    if is_demo_data:
-        st.info(
-            "Public demo mode: dashboard charts are using generated sample transactions "
-            "because the full dataset is not included in the GitHub deployment."
+        user = authenticate(
+            request.form.get("username", ""),
+            request.form.get("password", ""),
         )
+        if user is None:
+            flash("Invalid username or password.", "error")
+            return redirect(url_for("login"))
 
-    st.divider()
+        session["logged_in"] = True
+        session["username"] = user["username"]
+        session["role"] = user["role"]
+        flash("Login successful.", "success")
+        return redirect(url_for("dashboard"))
 
-    col1, col2 = st.columns(2)
+    return render_template("login.html", title="Login")
 
-    with col1:
-        st.plotly_chart(
-            fraud_pie_chart(df),
-            use_container_width=True
-        )
 
-    with col2:
-        st.plotly_chart(
-            amount_histogram(df),
-            use_container_width=True
-        )
+@app.get("/logout")
+def logout():
+    session.clear()
+    flash("Signed out.", "success")
+    return redirect(url_for("login"))
 
-    st.plotly_chart(
-        time_chart(df),
-        use_container_width=True
+
+@app.get("/")
+@login_required
+def dashboard():
+    username = session["username"]
+    stats = get_dashboard_stats()
+    summary = summarize_user_history(username)
+    checks = get_app_health(username=username)
+    readiness = health_summary(checks)
+    return render_template(
+        "dashboard.html",
+        title="Dashboard",
+        stats=stats,
+        summary=summary,
+        readiness=readiness,
+        checks=checks,
     )
 
-except Exception as e:
-    st.error(f"Dashboard Error: {e}")
 
-st.divider()
-# ===========================
-# FEATURES
-# ===========================
+@app.route("/predict", methods=["GET", "POST"])
+@login_required
+def predict():
+    form_values = {column: "0" for column in FEATURE_COLUMNS}
+    form_values["Amount"] = "100"
+    result = None
 
-st.subheader("Production-Oriented Capabilities")
+    if request.method == "POST":
+        form_values.update({column: request.form.get(column, "0") for column in FEATURE_COLUMNS})
 
-features = [
-    "✅ Real-time Fraud Detection",
-    "✅ Batch CSV Prediction",
-    "✅ Interactive Analytics Dashboard",
-    "✅ Fraud Probability Score",
-    "✅ Risk Classification",
-    "✅ Personalized AI Assistant",
-    "✅ AI Audit Report Generation",
-    "✅ PDF Report Export",
-    "✅ User Authentication",
-    "✅ Admin Dashboard",
-    "✅ Prediction History"
-]
+        try:
+            input_data = [float(form_values[column]) for column in FEATURE_COLUMNS]
+            model = load_model()
+            scaler = load_scaler()
+            prediction, probability = predict_transaction(model, scaler, input_data)
+        except Exception as exc:
+            flash(f"Prediction failed: {exc}", "error")
+            return render_template(
+                "predict.html",
+                title="Predict",
+                feature_columns=FEATURE_COLUMNS,
+                form_values=form_values,
+                result=None,
+            )
 
-left, right = st.columns(2)
+        prediction_text = get_prediction_text(prediction)
+        risk_level = get_risk_level(probability)
+        recommendation = get_recommendation(probability)
+        probability_percent = probability_to_percentage(probability)
+        transaction_id = str(uuid.uuid4())[:8]
+        amount = float(form_values["Amount"])
 
-for i, feature in enumerate(features):
-    if i < 5:
-        left.write(feature)
-    else:
-        right.write(feature)
+        save_prediction(
+            username=session["username"],
+            transaction_id=transaction_id,
+            prediction=prediction_text,
+            probability=probability_percent,
+            amount=amount,
+            risk_level=risk_level,
+        )
 
-st.divider()
+        result = {
+            "transaction_id": transaction_id,
+            "prediction": prediction_text,
+            "probability": probability_percent,
+            "risk_level": risk_level,
+            "recommendation": recommendation,
+            "assessment": get_transaction_assessment(
+                prediction=prediction,
+                probability=probability,
+                amount=amount,
+                risk_level=risk_level,
+            ),
+        }
 
-# ===========================
-# MODEL PERFORMANCE
-# ===========================
+    return render_template(
+        "predict.html",
+        title="Predict",
+        feature_columns=FEATURE_COLUMNS,
+        form_values=form_values,
+        result=result,
+    )
 
-st.subheader("📊 Model Performance")
 
-performance = pd.DataFrame({
-    "Metric": [
-        "Accuracy",
-        "Precision",
-        "Recall",
-        "F1 Score",
-        "ROC-AUC"
-    ],
-    "Score": [
-        "99.96%",
-        "98.90%",
-        "97.80%",
-        "98.30%",
-        "99.95%"
-    ]
-})
+@app.route("/batch", methods=["GET", "POST"])
+@login_required
+def batch():
+    result = None
 
-st.dataframe(
-    performance,
-    use_container_width=True,
-    hide_index=True
-)
+    if request.method == "POST":
+        uploaded_file = request.files.get("csv_file")
+        if uploaded_file is None or uploaded_file.filename == "":
+            flash("Upload a CSV file.", "error")
+            return redirect(url_for("batch"))
 
-st.divider()
+        try:
+            df = pd.read_csv(uploaded_file)
+            model = load_model()
+            scaler = load_scaler()
+            results, predictions, _ = predict_batch(model, scaler, df)
+        except Exception as exc:
+            flash(f"Batch prediction failed: {exc}", "error")
+            return redirect(url_for("batch"))
 
-# ===========================
-# TECH STACK
-# ===========================
+        total = len(results)
+        fraud = int((predictions == 1).sum())
+        genuine = int((predictions == 0).sum())
+        fraud_rate = round((fraud / total) * 100, 2) if total else 0
 
-st.subheader("🛠 Technology Stack")
+        conn = get_connection()
+        conn.execute(
+            """
+            INSERT INTO batch_predictions(username, filename, total, fraud, genuine, fraud_rate)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                session["username"],
+                uploaded_file.filename,
+                total,
+                fraud,
+                genuine,
+                fraud_rate,
+            ),
+        )
+        conn.commit()
+        conn.close()
 
-tech1, tech2, tech3 = st.columns(3)
+        csv_text = results.to_csv(index=False)
+        result = {
+            "filename": uploaded_file.filename,
+            "total": total,
+            "fraud": fraud,
+            "genuine": genuine,
+            "fraud_rate": fraud_rate,
+            "assessment": get_batch_assessment(total, fraud, genuine, fraud_rate),
+            "rows": results.head(50).to_dict(orient="records"),
+            "columns": list(results.columns),
+            "csv_data_uri": "data:text/csv;charset=utf-8," + quote(csv_text),
+        }
 
-with tech1:
-    st.success("""
-### Machine Learning
+    return render_template("batch.html", title="Batch", result=result)
 
-• Scikit-learn
 
-• Random Forest
+@app.route("/analytics", methods=["GET", "POST"])
+@login_required
+def analytics():
+    metrics = None
+    top_fraud = []
+    preview = []
 
-• SHAP
+    if request.method == "POST":
+        uploaded_file = request.files.get("csv_file")
+        if uploaded_file is None or uploaded_file.filename == "":
+            flash("Upload a labeled CSV file.", "error")
+            return redirect(url_for("analytics"))
 
-• Pandas
+        try:
+            df = pd.read_csv(uploaded_file)
+            if "Class" not in df.columns:
+                raise ValueError("Dataset must contain a Class column.")
+            if "Amount" not in df.columns:
+                raise ValueError("Dataset must contain an Amount column.")
+        except Exception as exc:
+            flash(f"Analytics failed: {exc}", "error")
+            return redirect(url_for("analytics"))
 
-• NumPy
-""")
+        total = len(df)
+        fraud = int((df["Class"] == 1).sum())
+        genuine = int((df["Class"] == 0).sum())
+        metrics = {
+            "total": total,
+            "fraud": fraud,
+            "genuine": genuine,
+            "fraud_rate": round((fraud / total) * 100, 3) if total else 0,
+            "total_amount": round(float(df["Amount"].sum()), 2),
+            "average_amount": round(float(df["Amount"].mean()), 2) if total else 0,
+        }
+        top_fraud = (
+            df[df["Class"] == 1]
+            .sort_values("Amount", ascending=False)
+            .head(20)
+            .to_dict(orient="records")
+        )
+        preview = df.head(10).to_dict(orient="records")
 
-with tech2:
-    st.success("""
-### Visualization
+    return render_template(
+        "analytics.html",
+        title="Analytics",
+        metrics=metrics,
+        preview=preview,
+        top_fraud=top_fraud,
+    )
 
-• Plotly
 
-• Matplotlib
+@app.get("/history")
+@login_required
+def history():
+    rows = [dict(row) for row in get_user_history(session["username"])]
+    return render_template("history.html", title="History", rows=rows)
 
-• Streamlit
 
-• Altair
-""")
+@app.get("/profile")
+@login_required
+def profile():
+    username = session["username"]
+    user = get_user_profile(username)
+    summary = summarize_user_history(username)
+    rows = [dict(row) for row in get_user_history(username)[:10]]
+    return render_template(
+        "profile.html",
+        title="Profile",
+        user=user,
+        summary=summary,
+        rows=rows,
+    )
 
-with tech3:
-    st.success("""
-### Deployment
 
-• FastAPI
+@app.get("/admin")
+@admin_required
+def admin():
+    users = [dict(row) for row in get_all_users()]
+    logs = [dict(row) for row in get_all_predictions()]
+    stats = get_dashboard_stats()
+    return render_template(
+        "admin.html",
+        title="Admin",
+        users=users,
+        logs=logs,
+        stats=stats,
+    )
 
-• Docker
 
-• GitHub
+@app.route("/assistant", methods=["GET", "POST"])
+@login_required
+def assistant():
+    response = None
+    checks = None
+    summary = None
+    admin_stats = None
+    model_result = None
+    prompt = ""
 
-• SQLite
-""")
+    if request.method == "POST":
+        prompt = request.form.get("prompt", "").strip()
+        intent = detect_app_intent(prompt)
 
-st.divider()
+        if intent is None:
+            response = "Tell me what you want to do in SecurePay AI."
+        elif intent["type"] == "navigate":
+            endpoint = ROUTES.get(intent["page"])
+            if endpoint == "admin" and session.get("role") != "admin":
+                flash("Admin access is required.", "error")
+            elif endpoint:
+                return redirect(url_for(endpoint))
+        elif intent["type"] == "health_check":
+            checks = get_app_health(username=session["username"])
+            response = health_summary(checks)["message"]
+        elif intent["type"] == "history_report":
+            return redirect(url_for("download_audit_report"))
+        elif intent["type"] == "admin_summary":
+            if session.get("role") != "admin":
+                flash("Admin access is required.", "error")
+            else:
+                admin_stats = get_dashboard_stats()
+        elif intent["type"] == "model_smoke_test":
+            try:
+                model = load_model()
+                scaler = load_scaler()
+                prediction, probability = predict_transaction(model, scaler, [0.0] * 29 + [100.0])
+                model_result = {
+                    "prediction": get_prediction_text(prediction),
+                    "probability": probability_to_percentage(probability),
+                    "risk_level": get_risk_level(probability),
+                }
+            except Exception as exc:
+                flash(f"Model test failed: {exc}", "error")
+        elif intent["type"] == "history_summary":
+            summary = summarize_user_history(session["username"])
+        else:
+            response = intent.get("answer") or get_assistant_answer(prompt)
 
-# ===========================
-# FOOTER
-# ===========================
+    return render_template(
+        "assistant.html",
+        title="AI Assistant",
+        prompt=prompt,
+        response=response,
+        checks=checks,
+        summary=summary,
+        admin_stats=admin_stats,
+        model_result=model_result,
+    )
 
-st.caption(
-    "🛡️ SecurePay AI | AI-powered Credit Card Fraud Detection | Built with Streamlit & Scikit-learn"
-)
 
-with st.sidebar:
+@app.get("/audit-report")
+@login_required
+def download_audit_report():
+    rows = get_user_history(session["username"])
+    if not rows:
+        flash("No prediction history is available for an audit report.", "warning")
+        return redirect(url_for("history"))
 
-    st.success(f"👤 {st.session_state.get('username', 'Guest')}")
+    try:
+        from reports.pdf_generator import generate_history_report
 
-    st.divider()
+        path = generate_history_report(
+            username=session["username"],
+            rows=rows,
+            summary=summarize_user_history(session["username"]),
+        )
+    except ModuleNotFoundError as exc:
+        flash(f"PDF dependency is missing: {exc.name}", "error")
+        return redirect(url_for("history"))
 
-    if st.button("🚪 Logout", use_container_width=True):
+    return send_file(path, as_attachment=True, download_name="SecurePay_AI_Audit_Report.pdf")
 
-        st.session_state.clear()
 
-        st.switch_page("pages/0_Login.py")
+@app.get("/about")
+def about():
+    return render_template("about.html", title="About")
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")))

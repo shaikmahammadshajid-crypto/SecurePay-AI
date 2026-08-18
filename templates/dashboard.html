@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <span class="kicker">Live fraud operations workspace</span>
+        <h1>Dashboard</h1>
+        <p>Monitor account activity, system readiness, prediction totals, and next actions from one Render-hosted web app.</p>
+    </div>
+</section>
+
+<section class="metrics">
+    <div><span>Users</span><strong>{{ stats.users }}</strong></div>
+    <div><span>Predictions</span><strong>{{ stats.predictions }}</strong></div>
+    <div><span>Frauds</span><strong>{{ stats.frauds }}</strong></div>
+    <div><span>Batch Jobs</span><strong>{{ stats.batches }}</strong></div>
+</section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>My Risk Summary</h2>
+        <p>Saved predictions: <strong>{{ summary.total }}</strong></p>
+        <p>Fraud: <strong>{{ summary.fraud }}</strong> | Genuine: <strong>{{ summary.genuine }}</strong></p>
+        <p>Average fraud probability: <strong>{{ summary.average_probability }}%</strong></p>
+        <p class="muted">{{ summary.latest }}</p>
+    </div>
+    <div class="panel">
+        <h2>System Readiness</h2>
+        <p class="status status-{{ readiness.status }}">{{ readiness.message }}</p>
+        {% for check in checks %}
+        <p>{{ "OK" if check.ok else "Needs attention" }}: {{ check.name }} - {{ check.detail }}</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="quick-actions">
+    <a href="{{ url_for('predict') }}">Score One Payment</a>
+    <a href="{{ url_for('batch') }}">Screen a CSV Batch</a>
+    <a href="{{ url_for('assistant') }}">Run AI Assistant</a>
+    <a href="{{ url_for('download_audit_report') }}">Download Audit Report</a>
+</section>
+{% endblock %}

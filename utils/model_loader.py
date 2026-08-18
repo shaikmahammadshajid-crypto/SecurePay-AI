@@ -1,12 +1,14 @@
 import os
+from functools import lru_cache
+
 import joblib
-import streamlit as st
+
 
 MODEL_PATH = "models/random_forest.pkl"
 SCALER_PATH = "models/scaler.pkl"
 
 
-@st.cache_resource
+@lru_cache(maxsize=1)
 def load_model():
     if not os.path.exists(MODEL_PATH):
         raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
@@ -17,7 +19,7 @@ def load_model():
         raise RuntimeError(f"Failed to load model: {e}")
 
 
-@st.cache_resource
+@lru_cache(maxsize=1)
 def load_scaler():
     if not os.path.exists(SCALER_PATH):
         raise FileNotFoundError(f"Scaler file not found: {SCALER_PATH}")

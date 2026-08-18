@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <span class="kicker">Render-hosted fraud workspace</span>
+        <h1>SecurePay AI</h1>
+        <p>Score payments, screen CSV batches, monitor risk, and generate audit-ready reports from a standard Render web service.</p>
+    </div>
+    <div class="hero-metrics">
+        <span><strong>30</strong> model signals</span>
+        <span><strong>SQLite</strong> audit trail</span>
+        <span><strong>Flask</strong> web runtime</span>
+    </div>
+</section>
+
+<section class="split">
+    <form class="panel" method="post">
+        <h2>Login</h2>
+        <input type="hidden" name="action" value="login">
+        <label>Username<input name="username" autocomplete="username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit">Login</button>
+    </form>
+
+    <form class="panel" method="post">
+        <h2>Register</h2>
+        <input type="hidden" name="action" value="register">
+        <label>Username<input name="username" autocomplete="username" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Password<input name="password" type="password" minlength="6" autocomplete="new-password" required></label>
+        <button type="submit">Create Account</button>
+    </form>
+</section>
+{% endblock %}

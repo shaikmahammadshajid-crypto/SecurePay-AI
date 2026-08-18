@@ -1,152 +1,79 @@
-# 🛡️ SecurePay AI
+# SecurePay AI
 
-<div align="center">
+SecurePay AI is a Render-hosted Flask web application for credit card fraud detection. It combines a trained Random Forest model, SQLite audit storage, bcrypt authentication, CSV batch screening, audit PDF reports, and an app-aware AI assistant command center.
 
-### 🚀 Enterprise AI-Powered Credit Card Fraud Detection System
+## Features
 
-An intelligent, production-ready web application that detects fraudulent credit card transactions using Machine Learning.
+- Secure login and registration with bcrypt password hashing
+- Single transaction fraud prediction
+- Batch CSV fraud screening
+- Personalized AI Assistant command center
+- Model and app health checks through `/health`
+- User prediction history and profile summaries
+- Admin dashboard for users, prediction logs, fraud counts, and batch jobs
+- PDF audit report generation
+- Reproducible model training script
+- Automated pytest reliability suite
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.45-red?style=for-the-badge&logo=streamlit)
-![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Random%20Forest-orange?style=for-the-badge&logo=scikitlearn)
-![SQLite](https://img.shields.io/badge/Database-SQLite-green?style=for-the-badge&logo=sqlite)
-![Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
+## Technology Stack
 
-</div>
+- Runtime: Flask + Gunicorn on Render
+- Backend: Python
+- Machine learning: scikit-learn, Joblib
+- Data processing: Pandas, NumPy
+- Database: SQLite
+- Reports: ReportLab
+- Tests: Pytest
 
----
-
-# 📌 Project Overview
-
-SecurePay AI is a production-ready Machine Learning application designed to detect fraudulent credit card transactions in real time. The system combines a trained Random Forest model with an interactive Streamlit interface to provide instant fraud detection, batch prediction, analytics, secure authentication, and downloadable reports.
-
-This project demonstrates the practical application of Artificial Intelligence and Machine Learning in financial cybersecurity.
-
----
-
-# ✨ Features
-
-- 🔐 Secure User Authentication
-- 💳 Real-Time Credit Card Fraud Prediction
-- 📂 Batch CSV Fraud Detection
-- 📊 Interactive Analytics Dashboard
-- 🤖 Personalized AI Assistant Command Center
-- 🩺 Model and App Health Checks
-- 📄 AI-Generated Audit Reports
-- 📈 Fraud Detection Statistics
-- 📜 Prediction History
-- 📄 PDF Report Generation
-- 📥 CSV Export
-- 🗄️ SQLite Database Integration
-- 🎨 Modern Responsive Streamlit UI
-- ✅ Automated Pytest Reliability Suite
-
----
-
-# 🤖 Machine Learning Model
-
-| Attribute | Details |
-|-----------|---------|
-| Algorithm | Random Forest Classifier |
-| Dataset | European Credit Card Fraud Dataset |
-| Total Transactions | 284,807 |
-| Fraud Cases | 492 |
-| Features | 30 |
-| Prediction Type | Binary Classification |
-
----
-
-# 🛠️ Technology Stack
-
-## Frontend
-- Streamlit
-
-## Backend
-- Python
-
-## Machine Learning
-- Scikit-learn
-- Joblib
-
-## Data Processing
-- Pandas
-- NumPy
-
-## Data Visualization
-- Plotly
-
-## Database
-- SQLite
-
-## Report Generation
-- ReportLab
-
----
-
-# 📂 Project Structure
+## Project Structure
 
 ```text
 SecurePayAI/
-│
 ├── app.py
-├── config.py
+├── render.yaml
 ├── requirements.txt
-├── README.md
-│
-├── assets/
-│   └── style.css
-│
+├── .python-version
 ├── database/
-│
 ├── models/
 │   ├── random_forest.pkl
 │   └── scaler.pkl
-│
-├── pages/
-│   ├── Login
-│   ├── Predict
-│   ├── Batch Prediction
-│   ├── Analytics
-│   ├── History
-│   ├── Profile
-│   └── About
-│
 ├── reports/
-│
-├── utils/
-│
-└── images/
+├── scripts/
+│   └── train_model.py
+├── static/
+│   └── style.css
+├── templates/
+├── tests/
+└── utils/
 ```
 
----
-
-# 🚀 Installation
-
-## Clone Repository
+## Local Setup
 
 ```bash
 git clone https://github.com/shaikmahammadshajid-crypto/SecurePay-AI.git
-```
-
-## Navigate to Project
-
-```bash
 cd SecurePay-AI
-```
-
-## Install Requirements
-
-```bash
 pip install -r requirements.txt
+python app.py
 ```
 
-## Run Application
+Open `http://127.0.0.1:5000`.
 
-```bash
-streamlit run app.py
-```
+## Production on Render
 
-## Run Tests
+This repository is configured for Render with `render.yaml`.
+
+- Runtime: Python
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn app:app --bind 0.0.0.0:$PORT`
+- Health check path: `/health`
+- Python version: `.python-version` pins `3.11.9`
+- Optional environment variable: `SECUREPAY_ADMIN_PASSWORD`
+
+Live service:
+
+https://securepay-ai-orhb.onrender.com
+
+## Tests
 
 ```bash
 python -m pytest -q
@@ -160,162 +87,8 @@ Place the credit card fraud dataset at `dataset/creditcard.csv`, then run:
 python scripts/train_model.py
 ```
 
----
+The training script writes updated model artifacts to `models/` and an evaluation report to `reports/model_evaluation.txt`.
 
-# 📊 Workflow
+## Accuracy Note
 
-```text
-User Login
-      │
-      ▼
-Enter Transaction Details
-      │
-      ▼
-Feature Scaling
-      │
-      ▼
-Random Forest Model
-      │
-      ▼
-Fraud Prediction
-      │
-      ▼
-Store Results
-      │
-      ▼
-Analytics Dashboard
-      │
-      ▼
-Generate PDF & CSV Reports
-```
-
----
-
-# 🔒 Security Features
-
-- Password Encryption using bcrypt
-- Secure Login Authentication
-- Protected Pages
-- User-specific Prediction History
-- Session Management
-
----
-
-# 📈 Analytics
-
-The application provides:
-
-- Fraud Distribution
-- Genuine Transaction Count
-- Prediction Statistics
-- Interactive Charts
-- Historical Analysis
-
----
-
-# 📷 Application Screenshot
-
-## 🏠 Dashboard
-
-![Dashboard](images/dashboard.png)
-
----
-
-## 💳 Prediction Page
-
-![Prediction](images/predict.png)
-
----
-
-## 📂 Batch Prediction
-
-![Batch Prediction](images/batch.png)
-
----
-
-## 📊 Analytics
-
-![Analytics](images/analytics.png)
-
----
-
-## 📜 History
-
-![History](images/history.png)
-
----
-
-## 👤 Profile
-
-![Profile](images/profile.png)
-
----
-
-## ℹ️ About
-
-![About](images/about.png)
----
-
-# 🌐 Live Demo
-
-👉 https://securepay-ai-dzwzcfdsgbjt3sam5c62ec.streamlit.app/
-
----
-
-# 🚀 Deploy on Render
-
-This repository includes `render.yaml` for one-click Render deployment.
-
-Render settings:
-
-- Repository: `shaikmahammadshajid-crypto/SecurePay-AI`
-- Branch: `main`
-- Runtime: Python
-- Build command: `pip install -r requirements.txt`
-- Start command: `streamlit run app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true`
-- Optional environment variable: `SECUREPAY_ADMIN_PASSWORD`
-
-Deploy link:
-
-👉 https://dashboard.render.com/blueprint/new?repo=https://github.com/shaikmahammadshajid-crypto/SecurePay-AI
-
----
-
-# 💻 GitHub Repository
-
-👉 https://github.com/shaikmahammadshajid-crypto/SecurePay-AI
----
-
-# 🚀 Future Enhancements
-
-- Deep Learning Models
-- Explainable AI (SHAP/LIME)
-- REST API
-- Banking API Integration
-- Mobile Application
-- Live Transaction Monitoring
-- Cloud Deployment Enhancements
-
----
-
-# 👨‍💻 Author
-
-**Shaik Mahammad Shajid**
-
-B.Tech Computer Science & Engineering (Data Science)
-
-Presidency University
-
----
-
-# 📜 License
-
-This project is developed for educational and learning purposes.
-
----
-
-<div align="center">
-
-### ⭐ If you found this project helpful, please consider giving it a Star ⭐
-
-</div>
+Fraud detection models should be evaluated with measured precision, recall, F1, ROC-AUC, and confusion matrix results. This project does not claim impossible 100% accuracy; it provides tests and training tooling so model quality can be measured against a labeled dataset.

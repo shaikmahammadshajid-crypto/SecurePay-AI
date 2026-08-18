@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero compact">
+    <div>
+        <span class="kicker">Account workspace</span>
+        <h1>Profile</h1>
+        <p>Track personal usage and recent prediction activity.</p>
+    </div>
+</section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>Account Details</h2>
+        <p>Username: <strong>{{ user.username }}</strong></p>
+        <p>Email: <strong>{{ user.email }}</strong></p>
+        <p>Role: <strong>{{ user.role }}</strong></p>
+        <p>Joined: <strong>{{ user.created_at }}</strong></p>
+    </div>
+    <div class="panel">
+        <h2>Prediction Statistics</h2>
+        <p>Total: <strong>{{ summary.total }}</strong></p>
+        <p>Fraud: <strong>{{ summary.fraud }}</strong></p>
+        <p>Genuine: <strong>{{ summary.genuine }}</strong></p>
+        <p>Average probability: <strong>{{ summary.average_probability }}%</strong></p>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Recent Predictions</h2>
+    {% set rows = rows %}
+    {% include "partials/simple_table.html" %}
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% if result.rows %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+            {% for column in result.columns %}
+                <th>{{ column }}</th>
+            {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result.rows %}
+            <tr>
+                {% for column in result.columns %}
+                <td>{{ row[column] }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="muted">No rows available.</p>
+{% endif %}

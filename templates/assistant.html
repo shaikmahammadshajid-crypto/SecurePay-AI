@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero compact">
+    <div>
+        <span class="kicker">Personalized AI operations</span>
+        <h1>AI Assistant</h1>
+        <p>Run safe app actions: navigate, check health, summarize activity, test the model, and generate reports.</p>
+    </div>
+</section>
+
+<form class="panel" method="post">
+    <label>Command<textarea name="prompt" rows="4" placeholder="Examples: check app health, summarize my activity, generate my audit report, open batch prediction">{{ prompt }}</textarea></label>
+    <div class="button-row">
+        <button name="prompt" value="check app health">Health</button>
+        <button name="prompt" value="summarize my activity">Summary</button>
+        <button name="prompt" value="generate my audit report">Audit Report</button>
+        <button name="prompt" value="test model">Model Test</button>
+    </div>
+    <button type="submit">Execute Command</button>
+</form>
+
+{% if response %}
+<section class="panel"><h2>Assistant Response</h2><p>{{ response }}</p></section>
+{% endif %}
+
+{% if summary %}
+<section class="panel">
+    <h2>Activity Summary</h2>
+    <p>Total: {{ summary.total }} | Fraud: {{ summary.fraud }} | Genuine: {{ summary.genuine }}</p>
+    <p>Average probability: {{ summary.average_probability }}%</p>
+    <p>{{ summary.latest }}</p>
+</section>
+{% endif %}
+
+{% if checks %}
+<section class="panel">
+    <h2>Health Check</h2>
+    {% for check in checks %}
+    <p>{{ "OK" if check.ok else "Needs attention" }}: {{ check.name }} - {{ check.detail }}</p>
+    {% endfor %}
+</section>
+{% endif %}
+
+{% if admin_stats %}
+<section class="metrics">
+    <div><span>Users</span><strong>{{ admin_stats.users }}</strong></div>
+    <div><span>Predictions</span><strong>{{ admin_stats.predictions }}</strong></div>
+    <div><span>Frauds</span><strong>{{ admin_stats.frauds }}</strong></div>
+    <div><span>Batch Jobs</span><strong>{{ admin_stats.batches }}</strong></div>
+</section>
+{% endif %}
+
+{% if model_result %}
+<section class="result-band">
+    <div><span>Prediction</span><strong>{{ model_result.prediction }}</strong></div>
+    <div><span>Fraud Probability</span><strong>{{ model_result.probability }}%</strong></div>
+    <div><span>Risk Level</span><strong>{{ model_result.risk_level }}</strong></div>
+</section>
+{% endif %}
+{% endblock %}

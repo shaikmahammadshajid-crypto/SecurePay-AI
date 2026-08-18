@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <span class="kicker">Render web service</span>
+        <h1>About SecurePay AI</h1>
+        <p>SecurePay AI is now a Flask application deployed directly on Render. It uses a trained Random Forest model, SQLite audit storage, bcrypt authentication, batch inference, and assistant-driven operational workflows.</p>
+    </div>
+</section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>Model</h2>
+        <p>Random Forest classifier with 30 transaction signals: Time, V1-V28, and Amount.</p>
+        <p>Predictions return a fraud/genuine label, probability, risk level, and operational recommendation.</p>
+    </div>
+    <div class="panel">
+        <h2>Render Runtime</h2>
+        <p>The production process is Gunicorn serving Flask. Render builds dependencies from requirements.txt and starts app:app.</p>
+        <p>Health checks run through the /health endpoint.</p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or "SecurePay AI" }} | SecurePay AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="{{ url_for('dashboard') if current_username else url_for('login') }}">
+                <span class="brand-mark">SP</span>
+                <span>
+                    <strong>SecurePay AI</strong>
+                    <small>Fraud operations</small>
+                </span>
+            </a>
+
+            {% if current_username %}
+            <nav class="nav">
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('predict') }}">Predict</a>
+                <a href="{{ url_for('batch') }}">Batch</a>
+                <a href="{{ url_for('analytics') }}">Analytics</a>
+                <a href="{{ url_for('assistant') }}">AI Assistant</a>
+                <a href="{{ url_for('history') }}">History</a>
+                <a href="{{ url_for('profile') }}">Profile</a>
+                {% if current_role == "admin" %}
+                <a href="{{ url_for('admin') }}">Admin</a>
+                {% endif %}
+                <a href="{{ url_for('about') }}">About</a>
+            </nav>
+            <div class="session-box">
+                <strong>{{ current_username }}</strong>
+                <span>{{ current_role }}</span>
+                <a href="{{ url_for('logout') }}">Sign out</a>
+            </div>
+            {% endif %}
+        </aside>
+
+        <main class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

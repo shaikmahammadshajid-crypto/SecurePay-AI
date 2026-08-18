@@ -1,116 +1,26 @@
-import streamlit as st
-
 from database.admin import get_dashboard_stats
 from database.history import get_user_history
-from utils.app_health import get_app_health, health_summary
-from utils.helpers import get_prediction_text, get_risk_level, probability_to_percentage
-from utils.model_loader import load_model, load_scaler
-from utils.prediction import predict_transaction
 
 
 PAGE_LINKS = {
-    "dashboard": ("Dashboard", "app.py"),
-    "predict": ("Predict", "pages/1_💳_Predict.py"),
-    "batch": ("Batch Prediction", "pages/2_📂_Batch_Prediction.py"),
-    "analytics": ("Analytics", "pages/3_📊_Analytics.py"),
-    "history": ("History", "pages/5_📜_History.py"),
-    "profile": ("Profile", "pages/6_👤_Profile.py"),
-    "admin": ("Admin", "pages/7_Admin.py"),
-    "assistant": ("AI Assistant", "pages/8_🤖_AI_Assistant.py"),
-}
-
-
-PAGE_GUIDES = {
-    "login": {
-        "intro": "Account access, registration, and credential troubleshooting.",
-        "quick": [
-            "Why can't I login after registration?",
-            "How do I create an account?",
-            "What is the admin account?",
-        ],
-    },
-    "dashboard": {
-        "intro": "Operational overview for fraud monitoring and model usage.",
-        "quick": [
-            "Where should I start?",
-            "How should fraud probability be used?",
-            "What real-world workflow does this support?",
-        ],
-    },
-    "predict": {
-        "intro": "Single-transaction fraud triage and analyst recommendations.",
-        "quick": [
-            "What values do I enter?",
-            "How do I interpret high risk?",
-            "What should a bank do next?",
-        ],
-    },
-    "batch": {
-        "intro": "Bulk transaction screening, case prioritization, and report export.",
-        "quick": [
-            "What CSV columns are required?",
-            "How should batch frauds be reviewed?",
-            "Can the CSV include Class?",
-        ],
-    },
-    "analytics": {
-        "intro": "Dataset investigation, fraud imbalance, and monitoring insights.",
-        "quick": [
-            "What does Class mean?",
-            "Why is fraud rate so low?",
-            "How do I use the charts?",
-        ],
-    },
-    "history": {
-        "intro": "Audit trail for past predictions and user-level investigation.",
-        "quick": [
-            "Where are predictions saved?",
-            "How do I export my history?",
-            "Why is my history empty?",
-        ],
-    },
-    "profile": {
-        "intro": "Account activity, prediction totals, and personal usage summary.",
-        "quick": [
-            "What does my profile show?",
-            "How is fraud count calculated?",
-            "Why is history empty?",
-        ],
-    },
-    "about": {
-        "intro": "Model, dataset, architecture, and project explanation.",
-        "quick": [
-            "How does the model work?",
-            "What are V1 to V28?",
-            "What makes this AI-based?",
-        ],
-    },
-    "admin": {
-        "intro": "Admin monitoring for users, prediction logs, and batch jobs.",
-        "quick": [
-            "What can admins see?",
-            "How are prediction logs counted?",
-            "How should fraud operations use this?",
-        ],
-    },
-    "assistant": {
-        "intro": "Personalized command center for app navigation, reports, health checks, and risk summaries.",
-        "quick": [
-            "Summarize my activity",
-            "Generate my audit report",
-            "Check app health",
-        ],
-    },
+    "dashboard": "dashboard",
+    "predict": "predict",
+    "batch": "batch",
+    "analytics": "analytics",
+    "history": "history",
+    "profile": "profile",
+    "admin": "admin",
+    "assistant": "assistant",
 }
 
 
 ANSWERS = {
     "can't i login after registration": (
-        "After registration the app now signs you in automatically. Usernames are saved in lowercase, "
+        "After registration the app signs you in automatically. Usernames are saved in lowercase, "
         "so login is case-insensitive. Use the same password you entered during registration."
     ),
     "cant i login after registration": (
-        "After registration the app now signs you in automatically. Usernames are saved in lowercase, "
+        "After registration the app signs you in automatically. Usernames are saved in lowercase, "
         "so login is case-insensitive. Use the same password you entered during registration."
     ),
     "create an account": (
@@ -122,8 +32,8 @@ ANSWERS = {
         "before first run to create an admin account."
     ),
     "where should i start": (
-        "Use Predict for one transaction, Batch Prediction for a CSV screening job, and Analytics for "
-        "understanding labeled fraud patterns."
+        "Use Predict for one transaction, Batch for CSV screening, Analytics for labeled datasets, "
+        "and History or Reports for audit review."
     ),
     "fraud probability": (
         "Fraud probability is a decision-support score. Low scores can usually be approved, medium scores "
@@ -156,11 +66,11 @@ ANSWERS = {
         "recall is poor, so probability, recall, and analyst review matter."
     ),
     "charts": (
-        "Use distribution charts to compare fraud and genuine behavior, amount histograms to identify unusual "
-        "transaction sizes, and correlation to inspect feature relationships."
+        "Use distributions to compare fraud and genuine behavior, amount metrics to identify unusual "
+        "transaction sizes, and top-fraud rows to inspect extreme examples."
     ),
     "saved": "Single predictions are saved in the local SQLite prediction_history table for the logged-in user.",
-    "export": "Use the CSV or PDF download buttons on prediction, batch, history, and admin pages.",
+    "export": "Use CSV downloads on batch results and PDF audit reports from Assistant or History.",
     "history empty": "History is empty until the current user completes a single transaction prediction.",
     "profile show": "Profile shows account details, total predictions, fraud count, genuine count, and recent history.",
     "fraud count": "Fraud count is calculated from saved predictions marked as Fraud Transaction.",
@@ -170,10 +80,10 @@ ANSWERS = {
     ),
     "v1 to v28": "V1 to V28 are anonymized PCA-transformed transaction features from the source dataset.",
     "what makes this ai-based": (
-        "The project uses a trained machine-learning model for fraud scoring, SHAP explainability, probability-based "
-        "risk decisions, batch inference, analytics, and AI-style operational recommendations."
+        "The project uses a trained machine-learning model for fraud scoring, probability-based risk decisions, "
+        "batch inference, analytics, and AI-style operational recommendations."
     ),
-    "admins see": "Admins can see users, prediction logs, fraud counts, batch jobs, and downloadable CSV reports.",
+    "admins see": "Admins can see users, prediction logs, fraud counts, batch jobs, and downloadable summaries.",
     "logs counted": "Prediction logs are counted from prediction_history; batch jobs are counted from batch_predictions.",
     "fraud operations": (
         "Fraud teams can use this as a triage console: detect, prioritize, investigate, export reports, and monitor "
@@ -198,7 +108,7 @@ def get_assistant_answer(question):
     if "login" in text or "credential" in text or "password" in text:
         return (
             "Check that the account exists, the password has the exact characters used at registration, and the "
-            "username is typed without spaces. New registrations now log in automatically."
+            "username is typed without spaces. New registrations log in automatically."
         )
 
     if "approve" in text or "block" in text or "review" in text:
@@ -215,14 +125,13 @@ def get_assistant_answer(question):
 
     if "do it" in text or "by itself" in text or "automatic" in text or "agent" in text:
         return (
-            "I can guide and prepare app actions, open the right workspace, summarize your data, and recommend next "
-            "steps. For security, actions that change accounts, create reports, or affect payment decisions should "
-            "stay user-confirmed instead of running silently."
+            "I can run safe app actions such as navigation, health checks, activity summaries, model tests, and "
+            "audit report generation. Payment decisions and account changes stay user-confirmed."
         )
 
     return (
         "I could not match that exactly. Try asking about fraud probability, high-risk actions, CSV columns, "
-        "registration login, SHAP explanation, reports, or admin monitoring."
+        "registration login, reports, app health, model tests, or admin monitoring."
     )
 
 
@@ -251,29 +160,7 @@ def get_transaction_assessment(prediction, probability, amount, risk_level):
     }
 
 
-def render_transaction_ai_assessment(prediction, probability, amount, risk_level):
-    assessment = get_transaction_assessment(
-        prediction=prediction,
-        probability=probability,
-        amount=amount,
-        risk_level=risk_level,
-    )
-
-    st.subheader("AI Fraud Analyst")
-    c1, c2 = st.columns(2)
-
-    with c1:
-        st.info(f"Decision Support: {assessment['decision']}")
-        st.write(assessment["summary"])
-
-    with c2:
-        st.warning(assessment["action"])
-        st.write(assessment["review"])
-
-
-def render_batch_ai_assessment(total, fraud, genuine, fraud_rate):
-    st.subheader("AI Batch Investigation Summary")
-
+def get_batch_assessment(total, fraud, genuine, fraud_rate):
     if fraud_rate >= 10:
         action = "Critical batch anomaly. Pause downstream settlement and review the upload source."
     elif fraud_rate >= 2:
@@ -283,13 +170,11 @@ def render_batch_ai_assessment(total, fraud, genuine, fraud_rate):
     else:
         action = "No fraud flagged. Keep the report as an audit record and continue monitoring."
 
-    c1, c2 = st.columns(2)
-    with c1:
-        st.info(
-            f"Screened {total:,} transactions: {fraud:,} fraud and {genuine:,} genuine."
-        )
-    with c2:
-        st.warning(f"{action} Fraud rate: {fraud_rate:.2f}%.")
+    return {
+        "summary": f"Screened {total:,} transactions: {fraud:,} fraud and {genuine:,} genuine.",
+        "action": action,
+        "fraud_rate": fraud_rate,
+    }
 
 
 def summarize_user_history(username):
@@ -350,6 +235,7 @@ def detect_app_intent(prompt):
         "profile": ["profile", "account", "my stats"],
         "admin": ["admin", "users", "logs"],
         "dashboard": ["home", "dashboard", "overview"],
+        "assistant": ["assistant", "agent", "ai command"],
     }
 
     for page, keywords in page_keywords.items():
@@ -357,212 +243,3 @@ def detect_app_intent(prompt):
             return {"type": "navigate", "page": page}
 
     return {"type": "answer", "answer": get_assistant_answer(prompt)}
-
-
-def render_health_check(username):
-    checks = get_app_health(username=username)
-    summary = health_summary(checks)
-
-    if summary["status"] == "ok":
-        st.success(f"App health: {summary['message']}")
-    else:
-        st.warning(f"App health: {summary['message']}")
-
-    for check in checks:
-        if check["ok"]:
-            st.write(f"OK: {check['name']} - {check['detail']}")
-        else:
-            st.write(f"Needs attention: {check['name']} - {check['detail']}")
-
-
-def render_history_summary(username):
-    if not username:
-        st.warning("Login is required before I can summarize account activity.")
-        return
-
-    summary = summarize_user_history(username)
-    st.info(
-        f"Saved predictions: {summary['total']} | Fraud: {summary['fraud']} | "
-        f"Genuine: {summary['genuine']} | Avg probability: {summary['average_probability']}%."
-    )
-    st.caption(summary["latest"])
-
-    if summary["fraud"] > 0:
-        st.warning("Priority: review fraud-labeled transactions first and export an audit report.")
-    elif summary["total"] > 0:
-        st.success("No fraud-labeled saved predictions for this account.")
-
-
-def render_history_report(username):
-    if not username:
-        st.warning("Login is required before I can create an audit report.")
-        return
-
-    rows = get_user_history(username)
-    if not rows:
-        st.info("No prediction history is available for an audit report.")
-        return
-
-    summary = summarize_user_history(username)
-    try:
-        from reports.pdf_generator import generate_history_report
-
-        pdf_file = generate_history_report(username=username, rows=rows, summary=summary)
-    except ModuleNotFoundError as e:
-        st.error(f"PDF generation dependency is missing: {e.name}")
-        return
-
-    with open(pdf_file, "rb") as file:
-        st.download_button(
-            "Download Audit Report",
-            data=file,
-            file_name="SecurePay_AI_Audit_Report.pdf",
-            mime="application/pdf",
-            use_container_width=True,
-            key=f"audit_report_download_{username}",
-        )
-
-
-def render_admin_summary(role):
-    if role != "admin":
-        st.warning("Admin summary requires an administrator account.")
-        return
-
-    stats = get_dashboard_stats()
-    c1, c2 = st.columns(2)
-    c1.metric("Users", stats["users"])
-    c2.metric("Predictions", stats["predictions"])
-    c1.metric("Frauds", stats["frauds"])
-    c2.metric("Batch Jobs", stats["batches"])
-
-
-def render_model_smoke_test():
-    try:
-        model = load_model()
-        scaler = load_scaler()
-        prediction, probability = predict_transaction(model, scaler, [0.0] * 29 + [100.0])
-    except Exception as e:
-        st.error(f"Model test failed: {e}")
-        return
-
-    prediction_text = get_prediction_text(prediction)
-    risk_level = get_risk_level(probability)
-    probability_percent = probability_to_percentage(probability)
-
-    st.success("Model test completed.")
-    st.write(f"Sample result: {prediction_text}")
-    st.write(f"Fraud probability: {probability_percent}%")
-    st.write(f"Risk level: {risk_level}")
-
-
-def render_agent_result(prompt, current_page=None):
-    intent = detect_app_intent(prompt)
-
-    if intent is None:
-        st.info("Tell me what you want to do in SecurePay AI.")
-        return
-
-    if intent["type"] == "navigate":
-        page = intent["page"]
-        label, path = PAGE_LINKS[page]
-        if page == "admin" and st.session_state.get("role") != "admin":
-            st.warning("Admin actions require an administrator account.")
-        elif page == current_page:
-            st.info(f"You are already in {label}.")
-        else:
-            st.switch_page(path)
-        return
-
-    if intent["type"] == "health_check":
-        render_health_check(st.session_state.get("username"))
-        return
-
-    if intent["type"] == "history_report":
-        render_history_report(st.session_state.get("username"))
-        return
-
-    if intent["type"] == "admin_summary":
-        render_admin_summary(st.session_state.get("role"))
-        return
-
-    if intent["type"] == "history_summary":
-        render_history_summary(st.session_state.get("username"))
-        return
-
-    if intent["type"] == "model_smoke_test":
-        render_model_smoke_test()
-        return
-
-    st.write(intent["answer"])
-
-
-def render_ai_assistant(page_key):
-    guide = PAGE_GUIDES.get(page_key, PAGE_GUIDES["dashboard"])
-
-    with st.sidebar:
-        st.markdown("### Personalized AI Assistant")
-        st.caption(guide["intro"])
-
-        quick_prompt = st.selectbox(
-            "Quick help",
-            ["Ask a custom question"] + guide["quick"],
-            key=f"{page_key}_assistant_quick",
-        )
-
-        custom_prompt = st.text_area(
-            "Ask or request an app action",
-            placeholder="Example: open batch prediction, summarize my activity, explain high risk",
-            key=f"{page_key}_assistant_prompt",
-            height=92,
-        )
-
-        prompt = custom_prompt.strip()
-        if not prompt and quick_prompt != "Ask a custom question":
-            prompt = quick_prompt
-
-        if st.button("Run Assistant", key=f"{page_key}_assistant_run", use_container_width=True):
-            render_agent_result(prompt, current_page=page_key)
-
-        st.markdown(
-            '<div class="assistant-note">The assistant can navigate, summarize, and advise. '
-            'Sensitive changes remain user-confirmed.</div>',
-            unsafe_allow_html=True,
-        )
-
-
-def render_ai_workspace():
-    st.markdown("""
-<div class="hero-panel">
-    <div class="hero-kicker">Personalized AI Operations</div>
-    <div class="hero-title">AI Assistant</div>
-    <p class="hero-copy">
-        Run app-aware commands, inspect system readiness, summarize account risk,
-        and generate audit-ready evidence from your saved activity.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
-    st.divider()
-
-    prompt = st.text_area(
-        "Command",
-        placeholder="Examples: check app health, summarize my activity, generate my audit report, open batch prediction",
-        height=110,
-        key="assistant_workspace_prompt",
-    )
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    quick_prompt = None
-
-    if col1.button("Health", use_container_width=True):
-        quick_prompt = "check app health"
-    if col2.button("Summary", use_container_width=True):
-        quick_prompt = "summarize my activity"
-    if col3.button("Report", use_container_width=True):
-        quick_prompt = "generate my audit report"
-    if col4.button("Model Test", use_container_width=True):
-        quick_prompt = "test model"
-
-    if quick_prompt or st.button("Execute", use_container_width=True):
-        render_agent_result(quick_prompt or prompt, current_page="assistant")
