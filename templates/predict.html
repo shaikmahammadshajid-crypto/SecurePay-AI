@@ -3,57 +3,135 @@
 {% block content %}
 <section class="hero compact">
     <div>
-        <span class="kicker">Single transaction review</span>
-        <h1>Payment Risk Scoring</h1>
-        <p>Enter the 30 model features and save the fraud decision to your audit history.</p>
+        <span class="kicker">Manual fraud prediction</span>
+        <h1>Analyze Transaction</h1>
+        <p>Enter the exact 30 model features: Time, V1 through V28, and Amount. SecurePay AI preserves the trained feature order before scaling and prediction.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button-link secondary" href="{{ url_for('sample_batch_csv') }}">CSV Template</a>
+        <a class="button-link secondary" href="{{ url_for('history') }}">History</a>
     </div>
 </section>
 
 <section class="panel">
     <div class="panel-head">
         <div>
-            <h2>Demo-Friendly Input</h2>
-            <p class="muted">For review, use one of these sample profiles to fill the form, then click Predict Transaction.</p>
+            <h2>Demo Inputs</h2>
+            <p class="muted">Use a sample transaction or enter all features manually.</p>
         </div>
         <div class="button-row">
-            {% for key, demo in demo_transactions.items() %}
-            <a class="button-link" href="{{ url_for('predict', demo=key) }}">{{ demo.label }}</a>
+            {% for key, sample in sample_transactions.items() %}
+            <button class="button-link secondary" type="button" data-sample-fill data-sample-values='{{ sample["values"]|tojson }}'>{{ sample.label }}</button>
             {% endfor %}
         </div>
     </div>
-    {% if demo_info %}
-    <p><strong>{{ demo_info.label }}:</strong> {{ demo_info.description }}</p>
+    {% if sample_info %}
+    <p><strong>{{ sample_info.label }}:</strong> {{ sample_info.description }}</p>
     {% endif %}
 </section>
 
-<form class="panel" method="post">
+<section class="grid two">
+    <div class="panel visual-panel">
+        <h2>Feature Readiness</h2>
+        <div class="progress-meter" data-feature-progress></div>
+        <div class="telemetry-grid">
+            <span><small>Amount</small><strong data-amount-preview>$0</strong></span>
+            <span><small>Time</small><strong data-time-preview>0 sec</strong></span>
+            <span><small>Active Signals</small><strong data-signal-preview>0/30</strong></span>
+        </div>
+    </div>
+    <div class="panel">
+        <h2>Risk Thresholds</h2>
+        <div class="risk-matrix compact">
+            <span class="low">LOW<b>&lt;30%</b></span>
+            <span class="medium">MEDIUM<b>30-59%</b></span>
+            <span class="high">HIGH<b>60-84%</b></span>
+            <span class="critical">CRITICAL<b>85%+</b></span>
+        </div>
+    </div>
+</section>
+
+<form class="panel" method="post" data-prediction-form>
+    <div class="panel-head">
+        <h2>Transaction Fields</h2>
+        <span class="muted">Required model inputs</span>
+    </div>
+    <div class="field-grid compact-fields">
+        <label>Time<input name="Time" type="number" step="any" min="0" value="{{ form_values['Time'] }}" required></label>
+        <label>Amount<input name="Amount" type="number" step="any" min="0" value="{{ form_values['Amount'] }}" required></label>
+    </div>
+
+    <div class="panel-head subhead">
+        <h2>PCA Features</h2>
+        <span class="muted">V1 through V28</span>
+    </div>
     <div class="field-grid">
-        {% for column in feature_columns %}
+        {% for column in feature_columns if column not in ["Time", "Amount"] %}
         <label>{{ column }}<input name="{{ column }}" type="number" step="any" value="{{ form_values[column] }}" required></label>
         {% endfor %}
     </div>
-    <button type="submit">Predict Transaction</button>
+    <button type="submit">Analyze Transaction</button>
 </form>
 
 {% if result %}
-<section class="result-band {{ 'danger' if 'Fraud' in result.prediction else 'success' }}">
-    <div><span>Transaction ID</span><strong>{{ result.transaction_id }}</strong></div>
-    <div><span>Prediction</span><strong>{{ result.prediction }}</strong></div>
-    <div><span>Fraud Probability</span><strong>{{ result.probability }}%</strong></div>
-    <div><span>Risk Level</span><strong>{{ result.risk_level }}</strong></div>
+<section class="result-showcase {{ 'danger' if 'Fraud' in result.prediction_text else 'success' }}">
+    <div class="risk-ring large" data-risk-meter="{{ result.probability_percent or 0 }}">
+        <span>{{ result.probability_display }}</span>
+        <small>fraud probability</small>
+    </div>
+    <div class="result-band">
+        <div><span>Transaction ID</span><strong>{{ result.transaction_id }}</strong></div>
+        <div><span>Prediction</span><strong>{{ result.prediction_text }}</strong></div>
+        <div><span>Risk Level</span><strong>{{ result.risk_level }}</strong></div>
+        <div><span>Amount</span><strong>${{ "%.2f"|format(result.amount) }}</strong></div>
+    </div>
 </section>
 
 <section class="grid two">
     <div class="panel">
-        <h2>AI Fraud Analyst</h2>
+        <h2>Technical Explanation</h2>
         <p><strong>{{ result.assessment.decision }}</strong></p>
         <p>{{ result.assessment.summary }}</p>
+        <p class="muted">Model: {{ result.model_name }} | Timestamp: {{ result.created_at }}</p>
     </div>
     <div class="panel">
-        <h2>Recommended Action</h2>
-        <p><strong>{{ result.assessment.action }}</strong></p>
+        <h2>Simple Explanation</h2>
+        <p><strong>{{ result.recommendation }}</strong></p>
         <p>{{ result.assessment.review }}</p>
+        <div class="button-row">
+            <a class="button-link secondary" href="{{ result.report_url }}">Download PDF Report</a>
+        </div>
     </div>
 </section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>SHAP Status</h2>
+        {% if shap_explanation and shap_explanation.available %}
+        <p>{{ shap_explanation.technical }}</p>
+        <p><strong>{{ shap_explanation.simple }}</strong></p>
+        {% else %}
+        <div class="empty-state">
+            <strong>SHAP unavailable</strong>
+            <p>{{ shap_explanation.message if shap_explanation else "Feature attribution was not generated." }}</p>
+        </div>
+        {% endif %}
+    </div>
+    <div class="panel chart-panel">
+        <h2>Feature Attribution</h2>
+        {% if shap_chart %}{{ shap_chart|safe }}{% else %}<div class="empty-state"><strong>No attribution chart</strong><p>The prediction completed without a SHAP chart.</p></div>{% endif %}
+    </div>
+</section>
+
+{% if shap_explanation and shap_explanation.top_features %}
+<section class="panel" data-table-panel>
+    <div class="panel-head">
+        <h2>Top Contributing Features</h2>
+        <input class="table-search" data-table-search type="search" placeholder="Search features">
+    </div>
+    {% set rows = shap_explanation.top_features %}
+    {% include "partials/simple_table.html" %}
+</section>
+{% endif %}
 {% endif %}
 {% endblock %}

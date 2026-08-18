@@ -3,18 +3,81 @@
 {% block content %}
 <section class="hero compact">
     <div>
-        <span class="kicker">Audit trail</span>
+        <span class="kicker">Prediction audit trail</span>
         <h1>Prediction History</h1>
-        <p>Review saved single-transaction predictions and export an audit report.</p>
+        <p>Search, sort, filter, and review saved credit-card fraud predictions. Standard users see only their own records.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button-link" href="{{ url_for('download_audit_report') }}">Download Audit PDF</a>
+        <a class="button-link secondary" href="{{ url_for('predict') }}">Manual Prediction</a>
     </div>
 </section>
 
 <section class="panel">
+    <form class="filter-row" method="get">
+        <label>Risk
+            <select name="risk">
+                <option value="">All risk levels</option>
+                {% for level in ["LOW", "MEDIUM", "HIGH", "CRITICAL", "UNAVAILABLE"] %}
+                <option value="{{ level }}" {{ "selected" if request.args.get("risk") == level else "" }}>{{ level }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Prediction
+            <select name="prediction">
+                <option value="">All predictions</option>
+                <option value="fraud" {{ "selected" if request.args.get("prediction") == "fraud" else "" }}>Fraud</option>
+                <option value="genuine" {{ "selected" if request.args.get("prediction") == "genuine" else "" }}>Genuine</option>
+            </select>
+        </label>
+        <button type="submit">Apply Filters</button>
+        <a class="button-link secondary" href="{{ url_for('history') }}">Clear</a>
+    </form>
+</section>
+
+<section class="panel" data-table-panel>
     <div class="panel-head">
         <h2>Saved Predictions</h2>
-        <a class="button-link" href="{{ url_for('download_audit_report') }}">Download Audit PDF</a>
+        <input class="table-search" data-table-search type="search" placeholder="Search history">
     </div>
-    {% set rows = rows %}
-    {% include "partials/simple_table.html" %}
+    {% if rows %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    {% if current_role == "admin" %}<th>Username</th>{% endif %}
+                    <th>Transaction ID</th>
+                    <th>Prediction</th>
+                    <th>Probability</th>
+                    <th>Amount</th>
+                    <th>Risk Level</th>
+                    <th>Created At</th>
+                    <th>Report</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td data-label="ID">{{ row.id }}</td>
+                    {% if current_role == "admin" %}<td data-label="Username">{{ row.username }}</td>{% endif %}
+                    <td data-label="Transaction ID">{{ row.transaction_id }}</td>
+                    <td data-label="Prediction">{{ row.prediction }}</td>
+                    <td data-label="Probability">{{ "%.2f"|format(row.probability or 0) }}%</td>
+                    <td data-label="Amount">${{ "%.2f"|format(row.amount or 0) }}</td>
+                    <td data-label="Risk Level"><span class="status-pill" data-level="{{ (row.risk_level or 'unknown')|lower }}">{{ row.risk_level }}</span></td>
+                    <td data-label="Created At">{{ row.created_at }}</td>
+                    <td data-label="Report"><a href="{{ url_for('prediction_report', prediction_id=row.id) }}">PDF</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <strong>No prediction history</strong>
+        <p>Run manual prediction to create your first saved record.</p>
+    </div>
+    {% endif %}
 </section>
 {% endblock %}

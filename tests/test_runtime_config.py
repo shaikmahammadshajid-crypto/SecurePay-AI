@@ -7,6 +7,10 @@ def test_requirements_do_not_include_streamlit_runtime():
     assert "streamlit" not in requirements
     assert "flask" in requirements
     assert "gunicorn" in requirements
+    assert "plotly" in requirements
+    assert "shap" in requirements
+    assert "reportlab" in requirements
+    assert "openpyxl" in requirements
 
 
 def test_render_uses_gunicorn_start_command():
@@ -14,3 +18,4 @@ def test_render_uses_gunicorn_start_command():
 
     assert "gunicorn app:app" in render_config
     assert "streamlit run" not in render_config
+    assert "SECUREPAY_BANK_PASSWORD" not in render_config

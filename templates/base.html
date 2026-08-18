@@ -1,51 +1,72 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title or "SecurePay AI" }} | SecurePay AI</title>
+    <title>{{ title or app_name }} | {{ app_name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
 </head>
-<body>
+<body data-endpoint="{{ current_endpoint or '' }}" data-role="{{ current_role or 'public' }}">
     <div class="app-shell">
         <aside class="sidebar">
-            <a class="brand" href="{{ url_for('dashboard') if current_username else url_for('login') }}">
+            <a class="brand" href="{{ url_for(home_endpoint) }}">
                 <span class="brand-mark">SP</span>
                 <span>
-                    <strong>SecurePay AI</strong>
-                    <small>Fraud operations</small>
+                    <strong>{{ app_name }}</strong>
+                    <small>Credit card fraud detection</small>
                 </span>
             </a>
 
-            <nav class="nav nav-public">
-                <a href="{{ url_for('demo') }}">Public Demo</a>
-                <a href="{{ url_for('reviewer_guide') }}">Reviewer Guide</a>
-                <a href="{{ url_for('presentation_download') }}">Presentation File</a>
-            </nav>
-
             {% if current_username %}
-            <nav class="nav">
-                <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('predict') }}">Predict</a>
-                <a href="{{ url_for('batch') }}">Batch</a>
-                <a href="{{ url_for('analytics') }}">Analytics</a>
-                <a href="{{ url_for('assistant') }}">AI Assistant</a>
-                <a href="{{ url_for('history') }}">History</a>
-                <a href="{{ url_for('profile') }}">Profile</a>
+            <p class="nav-label">Workspace</p>
+            <nav class="nav" aria-label="Application navigation">
                 {% if current_role == "admin" %}
-                <a href="{{ url_for('admin') }}">Admin</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'admin' else '' }}" href="{{ url_for('admin') }}"><span class="nav-icon">AD</span>Admin Dashboard</a>
+                {% else %}
+                <a class="nav-link {{ 'active' if current_endpoint == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}"><span class="nav-icon">DB</span>Dashboard</a>
                 {% endif %}
-                <a href="{{ url_for('about') }}">About</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'predict' else '' }}" href="{{ url_for('predict') }}"><span class="nav-icon">MP</span>Manual Prediction</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'batch' else '' }}" href="{{ url_for('batch') }}"><span class="nav-icon">CSV</span>Batch Prediction</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'analytics' else '' }}" href="{{ url_for('analytics') }}"><span class="nav-icon">AN</span>Analytics</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'history' else '' }}" href="{{ url_for('history') }}"><span class="nav-icon">HI</span>History</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'reports' else '' }}" href="{{ url_for('reports') }}"><span class="nav-icon">RP</span>Reports</a>
+                {% if current_role != "admin" %}
+                <a class="nav-link {{ 'active' if current_endpoint == 'profile' else '' }}" href="{{ url_for('profile') }}"><span class="nav-icon">PR</span>Profile</a>
+                {% endif %}
+                <a class="nav-link {{ 'active' if current_endpoint == 'about' else '' }}" href="{{ url_for('about') }}"><span class="nav-icon">IN</span>About</a>
             </nav>
             <div class="session-box">
+                <span class="session-label">Signed in</span>
                 <strong>{{ current_username }}</strong>
-                <span>{{ current_role }}</span>
-                <a href="{{ url_for('logout') }}">Sign out</a>
+                <span class="role-pill">{{ current_role }}</span>
+                <a class="signout-link" href="{{ url_for('logout') }}">Sign out</a>
+            </div>
+            {% else %}
+            <div class="session-box public-session">
+                <span class="session-label">Secure demo portal</span>
+                <a class="signout-link" href="{{ url_for('login') }}">Open portal</a>
             </div>
             {% endif %}
         </aside>
 
         <main class="content">
+            <header class="topbar">
+                <div>
+                    <span class="eyebrow">{{ title or "Workspace" }}</span>
+                    <strong>{{ app_title }}</strong>
+                </div>
+                <div class="topbar-status">
+                    <button class="icon-control" type="button" data-sidebar-toggle aria-label="Toggle navigation">Menu</button>
+                    <button class="command-trigger" type="button" data-command-open>Search</button>
+                    <button class="icon-control" type="button" data-theme-toggle aria-label="Toggle theme">Theme</button>
+                    {% if current_username %}
+                    <span>{{ current_username }}</span>
+                    <span class="status-dot"></span>
+                    {% endif %}
+                </div>
+            </header>
+
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                 <div class="alerts">
@@ -59,5 +80,16 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+    <div class="command-palette" data-command-palette hidden>
+        <div class="command-dialog" role="dialog" aria-modal="true" aria-label="App search">
+            <div class="command-head">
+                <strong>Search {{ app_name }}</strong>
+                <button type="button" class="ghost-button" data-command-close>Close</button>
+            </div>
+            <input data-command-input type="search" placeholder="Search pages and reports">
+            <div class="command-results" data-command-results></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>

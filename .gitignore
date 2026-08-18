@@ -1,13 +1,23 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 .DS_Store
 
 .idea/
 .vscode/
 
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+firebase-service-account*.json
 
 database/*.db
+*.sqlite
+*.sqlite3
 reports/generated/
-dataset/
+reports/*.tmp

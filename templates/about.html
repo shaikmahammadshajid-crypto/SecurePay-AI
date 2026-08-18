@@ -1,32 +1,105 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero">
+<section class="hero app-hero">
     <div>
-        <span class="kicker">Project meaning and purpose</span>
-        <h1>About SecurePay AI</h1>
-        <p>SecurePay AI solves a practical financial cybersecurity problem: identifying fraudulent card payments early enough for an analyst or bank system to review, verify, hold, or approve the transaction responsibly.</p>
+        <span class="kicker">About SecurePay AI</span>
+        <h1>AI-Powered Credit Card Fraud Detection System</h1>
+        <p>SecurePay AI Version 1 scores credit-card transaction features with a trained Random Forest model, classifies risk, saves audit history, explains predictions when SHAP is compatible, and generates reports.</p>
+    </div>
+    <div class="security-visual">
+        <div class="risk-ring" data-risk-meter="68">
+            <span>30</span>
+            <small>features</small>
+        </div>
+        <div class="signal-lanes">
+            <span style="--lane: 100%"><b>Exact feature order</b></span>
+            <span style="--lane: 82%"><b>Random Forest</b></span>
+            <span style="--lane: 70%"><b>SHAP attribution</b></span>
+        </div>
+    </div>
+</section>
+
+<section class="app-card-grid">
+    <a class="app-card" href="{{ url_for('predict') }}">
+        <span class="app-card-icon">MP</span>
+        <strong>Manual Prediction</strong>
+        <p>Analyze one transaction with all 30 required model features.</p>
+    </a>
+    <a class="app-card" href="{{ url_for('batch') }}">
+        <span class="app-card-icon">CSV</span>
+        <strong>Batch Prediction</strong>
+        <p>Validate a CSV and score every transaction row.</p>
+    </a>
+    <a class="app-card" href="{{ url_for('analytics') }}">
+        <span class="app-card-icon">AN</span>
+        <strong>Analytics</strong>
+        <p>Inspect fraud rates, probability distributions, trends, and amount patterns.</p>
+    </a>
+    <a class="app-card" href="{{ url_for('reports') if current_username else url_for('login') }}">
+        <span class="app-card-icon">RP</span>
+        <strong>Reports</strong>
+        <p>Generate PDF evidence for predictions, history, and batches.</p>
+    </a>
+</section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>Machine Learning Pipeline</h2>
+        <div class="workflow-steps">
+            <span>Validate input</span>
+            <span>Order features</span>
+            <span>Scale values</span>
+            <span>Predict fraud</span>
+        </div>
+        <p class="muted">The trained model is a Random Forest classifier. The scaler is a StandardScaler. Probability is shown only when the model supports `predict_proba`.</p>
+    </div>
+    <div class="panel">
+        <h2>Model Status</h2>
+        <dl class="detail-list">
+            <div><dt>Model</dt><dd>{{ model_info.model_name }}</dd></div>
+            <div><dt>Type</dt><dd>{{ model_info.model_type or "Unavailable" }}</dd></div>
+            <div><dt>Scaler</dt><dd>{{ model_info.scaler_name }}</dd></div>
+            <div><dt>Status</dt><dd>{{ model_info.status }}</dd></div>
+            <div><dt>Features</dt><dd>{{ model_info.feature_count }}</dd></div>
+        </dl>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Required Feature Schema</h2>
+        <span class="muted">Exact order preserved everywhere</span>
+    </div>
+    <div class="feature-chip-grid">
+        {% for column in feature_columns %}
+        <span>{{ column }}</span>
+        {% endfor %}
     </div>
 </section>
 
 <section class="grid two">
     <div class="panel">
-        <h2>Main Task</h2>
-        <p>Input transaction features, scale them with the trained scaler, classify the payment with a Random Forest model, and return fraud probability, risk level, recommendation, and audit history.</p>
+        <h2>Technology Stack</h2>
+        <div class="feature-chip-grid">
+            <span>Python</span>
+            <span>Flask</span>
+            <span>SQLite</span>
+            <span>bcrypt</span>
+            <span>pandas</span>
+            <span>NumPy</span>
+            <span>scikit-learn</span>
+            <span>joblib</span>
+            <span>Plotly</span>
+            <span>SHAP</span>
+            <span>ReportLab</span>
+            <span>openpyxl</span>
+        </div>
     </div>
     <div class="panel">
-        <h2>Why It Matters</h2>
-        <p>Fraud losses are expensive and real fraud cases are rare, so the app focuses on probability-based triage, review workflow, and evidence storage instead of only showing a prediction label.</p>
-    </div>
-    <div class="panel">
-        <h2>Model</h2>
-        <p>Random Forest classifier with 30 transaction signals: Time, V1-V28, and Amount.</p>
-        <p>Predictions return a fraud/genuine label, probability, risk level, and operational recommendation.</p>
-    </div>
-    <div class="panel">
-        <h2>Render Runtime</h2>
-        <p>The production process is Gunicorn serving Flask. Render builds dependencies from requirements.txt and starts app:app.</p>
-        <p>Health checks run through the /health endpoint.</p>
+        <h2>Responsible Use</h2>
+        <p>SecurePay AI provides model-based decision support for fraud detection demos and analysis. It does not guarantee that a transaction is fraudulent or genuine.</p>
+        <p>SHAP explanations are feature attributions for this model output. They do not prove causality.</p>
     </div>
 </section>
 {% endblock %}

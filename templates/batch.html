@@ -3,34 +3,75 @@
 {% block content %}
 <section class="hero compact">
     <div>
-        <span class="kicker">Bulk fraud screening</span>
-        <h1>Batch Prediction</h1>
-        <p>Upload a CSV with Time, V1-V28, and Amount. Class is allowed and ignored during scoring.</p>
+        <span class="kicker">Batch CSV prediction</span>
+        <h1>Screen Transaction CSV</h1>
+        <p>Upload a CSV containing the 30 required model features. The app validates the file before running the Random Forest pipeline.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button-link secondary" href="{{ url_for('sample_batch_csv') }}">Download Template</a>
+        <a class="button-link secondary" href="{{ url_for('analytics') }}">Analytics</a>
     </div>
 </section>
 
-<form class="panel" method="post" enctype="multipart/form-data">
-    <label>CSV File<input name="csv_file" type="file" accept=".csv" required></label>
-    <button type="submit">Predict Batch</button>
-</form>
+<section class="grid two">
+    <form class="panel upload-panel" method="post" enctype="multipart/form-data">
+        <h2>Upload CSV</h2>
+        <label class="dropzone" data-dropzone>
+            <input name="csv_file" type="file" accept=".csv" required>
+            <span data-file-label>Drop CSV here or browse</span>
+            <small>Required: Time, V1-V28, Amount</small>
+        </label>
+        <button type="submit">Analyze Batch</button>
+    </form>
+    <div class="panel">
+        <h2>Validation Rules</h2>
+        <div class="list-stack">
+            <span>File extension must be .csv</span>
+            <span>Required columns: Time, V1 through V28, Amount</span>
+            <span>Values must be numeric, finite, and non-empty</span>
+            <span>Maximum rows: {{ "{:,}".format(max_batch_rows) }}</span>
+            <span>Maximum upload: {{ max_upload_mb }} MB</span>
+        </div>
+    </div>
+</section>
 
 {% if result %}
-<section class="metrics">
-    <div><span>Total</span><strong>{{ result.total }}</strong></div>
-    <div><span>Fraud</span><strong>{{ result.fraud }}</strong></div>
-    <div><span>Genuine</span><strong>{{ result.genuine }}</strong></div>
-    <div><span>Fraud Rate</span><strong>{{ result.fraud_rate }}%</strong></div>
+<section class="metrics metric-strip">
+    <div><span>Total Transactions</span><strong data-count="{{ result.total }}">0</strong></div>
+    <div><span>Fraud Transactions</span><strong data-count="{{ result.fraud }}">0</strong></div>
+    <div><span>Genuine Transactions</span><strong data-count="{{ result.genuine }}">0</strong></div>
+    <div><span>Fraud Rate</span><strong data-count="{{ result.fraud_rate }}" data-suffix="%">0%</strong></div>
 </section>
 
-<section class="panel">
-    <h2>AI Batch Summary</h2>
-    <p>{{ result.assessment.summary }}</p>
-    <p><strong>{{ result.assessment.action }}</strong></p>
-    <a class="button-link" download="batch_predictions.csv" href="{{ result.csv_data_uri }}">Download Results CSV</a>
+<section class="panel visual-panel">
+    <div class="panel-head">
+        <div>
+            <h2>Batch Summary</h2>
+            <p class="muted">Average fraud probability: {{ "%.2f"|format(result.average_probability) }}%</p>
+        </div>
+        <div class="button-row">
+            {% if result.download_csv %}<a class="button-link" href="{{ result.download_csv }}">Download CSV</a>{% endif %}
+            {% if result.download_excel %}<a class="button-link secondary" href="{{ result.download_excel }}">Download Excel</a>{% endif %}
+            {% if result.download_pdf %}<a class="button-link secondary" href="{{ result.download_pdf }}">Download PDF</a>{% endif %}
+        </div>
+    </div>
+    <div class="risk-visual compact">
+        <div class="risk-ring" data-risk-meter="{{ result.fraud_rate }}">
+            <span>{{ result.fraud_rate }}%</span>
+            <small>fraud rate</small>
+        </div>
+        <div>
+            <p>{{ result.assessment.summary }}</p>
+            <p><strong>{{ result.assessment.action }}</strong></p>
+        </div>
+    </div>
 </section>
 
-<section class="panel">
-    <h2>Preview</h2>
+<section class="panel" data-table-panel>
+    <div class="panel-head">
+        <h2>Scored Preview</h2>
+        <input class="table-search" data-table-search type="search" placeholder="Search scored rows">
+    </div>
     {% include "partials/table.html" with context %}
 </section>
 {% endif %}

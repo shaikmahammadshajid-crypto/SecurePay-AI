@@ -3,53 +3,90 @@
 {% block content %}
 <section class="hero">
     <div>
-        <span class="kicker">Main project task</span>
-        <h1>Credit Card Fraud Detection</h1>
-        <p>SecurePay AI predicts whether a card transaction is genuine or fraudulent, shows the probability and recommended action, then stores the result for investigation and audit.</p>
+        <span class="kicker">Fraud analytics workspace</span>
+        <h1>Dashboard</h1>
+        <p>Monitor your saved credit-card fraud predictions, recent model decisions, average risk, and system readiness.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button-link" href="{{ url_for('predict') }}">Manual Prediction</a>
+        <a class="button-link secondary" href="{{ url_for('batch') }}">Batch CSV Prediction</a>
     </div>
 </section>
 
-<section class="panel">
-    <h2>How to Use This Project</h2>
-    <div class="workflow-steps">
-        <span>1. Login or register</span>
-        <span>2. Predict one payment or upload a batch CSV</span>
-        <span>3. Review risk level and AI recommendation</span>
-        <span>4. Save history and generate audit evidence</span>
-        <span>5. Use AI Assistant or Admin tools for review</span>
+<section class="metrics metric-strip">
+    <div><span>Total Transactions</span><strong data-count="{{ summary.total }}">0</strong></div>
+    <div><span>Fraud Detected</span><strong data-count="{{ summary.fraud }}">0</strong></div>
+    <div><span>Genuine Transactions</span><strong data-count="{{ summary.genuine }}">0</strong></div>
+    <div><span>Avg Fraud Probability</span><strong data-count="{{ summary.average_probability }}" data-suffix="%">0%</strong></div>
+</section>
+
+<section class="grid two">
+    <div class="panel visual-panel">
+        <div class="panel-head">
+            <h2>Risk Summary</h2>
+            <span class="status-pill">{{ readiness.status }}</span>
+        </div>
+        <div class="risk-visual">
+            <div class="risk-ring" data-risk-meter="{{ summary.average_probability }}">
+                <span>{{ summary.average_probability }}%</span>
+                <small>avg risk</small>
+            </div>
+            <div>
+                <p class="lead-text">{{ summary.latest }}</p>
+                <div class="mini-metrics">
+                    <span><strong data-count="{{ stats.batches }}">0</strong> batch jobs</span>
+                    <span><strong>${{ summary.average_amount }}</strong> avg amount</span>
+                    <span><strong data-count="{{ stats.high_risk }}">0</strong> high-risk</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel">
+        <h2>Quick Actions</h2>
+        <div class="quick-actions compact">
+            <a href="{{ url_for('predict') }}">Manual Prediction</a>
+            <a href="{{ url_for('batch') }}">Batch Prediction</a>
+            <a href="{{ url_for('analytics') }}">Analytics</a>
+            <a href="{{ url_for('history') }}">History</a>
+            <a href="{{ url_for('reports') }}">Reports</a>
+        </div>
     </div>
 </section>
 
-<section class="metrics">
-    <div><span>Users</span><strong>{{ stats.users }}</strong></div>
-    <div><span>Predictions</span><strong>{{ stats.predictions }}</strong></div>
-    <div><span>Frauds</span><strong>{{ stats.frauds }}</strong></div>
-    <div><span>Batch Jobs</span><strong>{{ stats.batches }}</strong></div>
+<section class="grid two">
+    <div class="panel chart-panel">
+        <h2>Fraud vs Genuine</h2>
+        {% if charts.fraud %}{{ charts.fraud|safe }}{% else %}<div class="empty-state"><strong>No chart data</strong><p>Run a prediction to populate this chart.</p></div>{% endif %}
+    </div>
+    <div class="panel chart-panel">
+        <h2>Risk Distribution</h2>
+        {% if charts.risk %}{{ charts.risk|safe }}{% else %}<div class="empty-state"><strong>No chart data</strong><p>Risk bands appear after predictions are saved.</p></div>{% endif %}
+    </div>
+</section>
+
+<section class="panel chart-panel">
+    <h2>Activity Trend</h2>
+    {% if charts.trend %}{{ charts.trend|safe }}{% else %}<div class="empty-state"><strong>No trend yet</strong><p>Saved predictions create the trend line.</p></div>{% endif %}
 </section>
 
 <section class="grid two">
     <div class="panel">
-        <h2>My Risk Summary</h2>
-        <p>Saved predictions: <strong>{{ summary.total }}</strong></p>
-        <p>Fraud: <strong>{{ summary.fraud }}</strong> | Genuine: <strong>{{ summary.genuine }}</strong></p>
-        <p>Average fraud probability: <strong>{{ summary.average_probability }}%</strong></p>
-        <p class="muted">{{ summary.latest }}</p>
-    </div>
-    <div class="panel">
         <h2>System Readiness</h2>
         <p class="status status-{{ readiness.status }}">{{ readiness.message }}</p>
         {% for check in checks %}
-        <p>{{ "OK" if check.ok else "Needs attention" }}: {{ check.name }} - {{ check.detail }}</p>
+        <div class="check-row {{ 'ok' if check.ok else 'attention' }}">
+            <span>{{ "OK" if check.ok else "Review" }}</span>
+            <p><strong>{{ check.name }}</strong><br>{{ check.detail }}</p>
+        </div>
         {% endfor %}
     </div>
-</section>
-
-<section class="quick-actions">
-    <a href="{{ url_for('predict') }}">Score One Payment</a>
-    <a href="{{ url_for('predict', demo='baseline') }}">Try Demo Prediction</a>
-    <a href="{{ url_for('batch') }}">Screen a CSV Batch</a>
-    <a href="{{ url_for('assistant') }}">Run AI Assistant</a>
-    <a href="{{ url_for('download_audit_report') }}">Download Audit Report</a>
-    <a href="{{ url_for('reviewer_guide') }}">Reviewer Guide</a>
+    <div class="panel" data-table-panel>
+        <div class="panel-head">
+            <h2>Recent Predictions</h2>
+            <input class="table-search" data-table-search type="search" placeholder="Search recent predictions">
+        </div>
+        {% set rows = recent_rows %}
+        {% include "partials/simple_table.html" %}
+    </div>
 </section>
 {% endblock %}

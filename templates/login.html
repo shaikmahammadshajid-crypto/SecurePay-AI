@@ -3,28 +3,38 @@
 {% block content %}
 <section class="hero">
     <div>
-        <span class="kicker">Final year AI fraud detection project</span>
+        <span class="kicker">Version 1 fraud detection</span>
         <h1>SecurePay AI</h1>
-        <p>The main task of this project is to detect suspicious credit card transactions using machine learning, explain the risk to users, and preserve every prediction for review and audit.</p>
+        <p>AI-powered credit-card fraud detection with manual scoring, CSV batch prediction, analytics, SHAP-ready explanations, and PDF reporting.</p>
     </div>
-    <div class="hero-metrics">
-        <span><strong>30</strong> model signals</span>
-        <span><strong>SQLite</strong> audit trail</span>
-        <span><strong>Flask</strong> web runtime</span>
+    <div class="security-visual">
+        <div class="risk-ring" data-risk-meter="72">
+            <span>RF</span>
+            <small>model</small>
+        </div>
+        <div class="signal-lanes">
+            <span style="--lane: 100%"><b>30 feature schema</b></span>
+            <span style="--lane: 84%"><b>bcrypt authentication</b></span>
+            <span style="--lane: 68%"><b>SQLite audit trail</b></span>
+        </div>
     </div>
 </section>
 
 <section class="split">
-    <form class="panel" method="post">
+    <form class="panel role-card" method="post">
+        <span class="role-card-icon">LI</span>
         <h2>Login</h2>
+        <p class="muted">Use your registered account. Admin users are routed to the admin dashboard automatically.</p>
         <input type="hidden" name="action" value="login">
         <label>Username<input name="username" autocomplete="username" required></label>
         <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
         <button type="submit">Login</button>
     </form>
 
-    <form class="panel" method="post">
+    <form class="panel role-card" method="post">
+        <span class="role-card-icon">RG</span>
         <h2>Register</h2>
+        <p class="muted">Create a standard user account for fraud-detection demos and personal prediction history.</p>
         <input type="hidden" name="action" value="register">
         <label>Username<input name="username" autocomplete="username" required></label>
         <label>Email<input name="email" type="email" autocomplete="email" required></label>
@@ -33,11 +43,28 @@
     </form>
 </section>
 
-<section class="panel">
-    <h2>Reviewer Quick Start</h2>
-    <p>This project demonstrates a complete fraud-review workflow: create an account, score a transaction, review the AI recommendation, check history, generate an audit report, and verify system health.</p>
-    <p>For a quick review without login, open the public demo first.</p>
-    <a class="button-link" href="{{ url_for('demo') }}">Open Public Demo</a>
-    <a class="button-link" href="{{ url_for('reviewer_guide') }}">Open Reviewer Guide</a>
+<section class="grid two">
+    <div class="panel">
+        <h2>Demo Workflow</h2>
+        <div class="list-stack">
+            <span>Register or login</span>
+            <span>Run manual fraud prediction</span>
+            <span>Upload a batch CSV</span>
+            <span>Open analytics, history, and reports</span>
+        </div>
+    </div>
+    <div class="panel">
+        <h2>Security Controls</h2>
+        <div class="list-stack">
+            <span>Passwords are stored with bcrypt hashes</span>
+            <span>Admin pages enforce server-side role checks</span>
+            <span>CSV uploads are validated before scoring</span>
+            <span>Model artifacts are loaded once and reused</span>
+        </div>
+        <div class="button-row">
+            <a class="button-link secondary" href="{{ url_for('sample_batch_csv') }}">Download Sample CSV</a>
+            <a class="button-link secondary" href="{{ url_for('about') }}">About</a>
+        </div>
+    </div>
 </section>
 {% endblock %}

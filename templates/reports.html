@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero compact">
+    <div>
+        <span class="kicker">PDF and export center</span>
+        <h1>Reports</h1>
+        <p>Create professional fraud-detection reports for single transactions, audit history, and recent batch jobs.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button-link" href="{{ url_for('download_audit_report') }}">Download Audit PDF</a>
+        <a class="button-link secondary" href="{{ url_for('batch') }}">Batch Prediction</a>
+    </div>
+</section>
+
+<section class="metrics metric-strip">
+    <div><span>Total Predictions</span><strong data-count="{{ summary.total }}">0</strong></div>
+    <div><span>Fraud Predictions</span><strong data-count="{{ summary.fraud }}">0</strong></div>
+    <div><span>Genuine Predictions</span><strong data-count="{{ summary.genuine }}">0</strong></div>
+    <div><span>Avg Fraud Probability</span><strong data-count="{{ summary.average_probability }}" data-suffix="%">0%</strong></div>
+</section>
+
+<section class="grid two">
+    <div class="panel">
+        <h2>Model Information</h2>
+        <dl class="detail-list">
+            <div><dt>Model</dt><dd>{{ model_info.model_name }}</dd></div>
+            <div><dt>Type</dt><dd>{{ model_info.model_type or "Unavailable" }}</dd></div>
+            <div><dt>Status</dt><dd>{{ model_info.status }}</dd></div>
+            <div><dt>Scaler</dt><dd>{{ model_info.scaler_name }}</dd></div>
+            <div><dt>Features</dt><dd>{{ model_info.feature_count }}</dd></div>
+        </dl>
+    </div>
+    <div class="panel">
+        <h2>Report Scope</h2>
+        <div class="list-stack">
+            <span>Single reports include transaction ID, prediction, probability, amount, timestamp, model, and SHAP attribution when available</span>
+            <span>Audit reports summarize saved prediction history</span>
+            <span>Batch reports are generated immediately after successful CSV prediction</span>
+            <span>Reports are decision-support evidence, not fraud guarantees</span>
+        </div>
+    </div>
+</section>
+
+<section class="panel" data-table-panel>
+    <div class="panel-head">
+        <h2>Recent Single Predictions</h2>
+        <input class="table-search" data-table-search type="search" placeholder="Search reports">
+    </div>
+    {% if rows %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    {% if current_role == "admin" %}<th>Username</th>{% endif %}
+                    <th>Transaction ID</th>
+                    <th>Prediction</th>
+                    <th>Probability</th>
+                    <th>Risk Level</th>
+                    <th>Created At</th>
+                    <th>PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td data-label="ID">{{ row.id }}</td>
+                    {% if current_role == "admin" %}<td data-label="Username">{{ row.username }}</td>{% endif %}
+                    <td data-label="Transaction ID">{{ row.transaction_id }}</td>
+                    <td data-label="Prediction">{{ row.prediction }}</td>
+                    <td data-label="Probability">{{ "%.2f"|format(row.probability or 0) }}%</td>
+                    <td data-label="Risk Level">{{ row.risk_level }}</td>
+                    <td data-label="Created At">{{ row.created_at }}</td>
+                    <td data-label="PDF"><a href="{{ url_for('prediction_report', prediction_id=row.id) }}">Download</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <strong>No reports yet</strong>
+        <p>Analyze a transaction to enable single-transaction reports.</p>
+    </div>
+    {% endif %}
+</section>
+
+<section class="panel" data-table-panel>
+    <div class="panel-head">
+        <h2>Recent Batch Summaries</h2>
+        <input class="table-search" data-table-search type="search" placeholder="Search batches">
+    </div>
+    {% set rows = batches %}
+    {% include "partials/simple_table.html" %}
+</section>
+{% endblock %}

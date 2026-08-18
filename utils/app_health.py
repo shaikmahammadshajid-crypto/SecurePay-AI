@@ -1,16 +1,17 @@
 from pathlib import Path
 
-from database.db import DB_PATH, get_connection
-from utils.model_loader import MODEL_PATH, SCALER_PATH
+from config import DATABASE_PATH, MODEL_PATH, SCALER_PATH
+from database.db import get_connection
+from utils.model_loader import get_model_info
 
 
 def get_app_health(username=None):
     checks = [
-        file_check("Model artifact", MODEL_PATH),
-        file_check("Scaler artifact", SCALER_PATH),
+        file_check("Random Forest model artifact", MODEL_PATH),
+        file_check("StandardScaler artifact", SCALER_PATH),
+        database_check(),
+        model_interface_check(),
     ]
-
-    checks.append(database_check())
 
     if username:
         checks.append(user_history_check(username))
@@ -43,20 +44,37 @@ def database_check():
         return {
             "name": "SQLite database",
             "ok": False,
-            "detail": f"{DB_PATH.as_posix()} is not reachable: {exc}",
+            "detail": f"{DATABASE_PATH.as_posix()} is not reachable: {exc}",
         }
 
     return {
         "name": "SQLite database",
         "ok": True,
-        "detail": f"{DB_PATH.as_posix()} is reachable.",
+        "detail": f"{DATABASE_PATH.as_posix()} is reachable.",
+    }
+
+
+def model_interface_check():
+    info = get_model_info()
+    if info["status"] == "Ready":
+        probability = "with probability output" if info["probability_supported"] else "without probability output"
+        return {
+            "name": "Model interface",
+            "ok": True,
+            "detail": f"{info['model_type']} is ready for {info['feature_count']} features {probability}.",
+        }
+
+    return {
+        "name": "Model interface",
+        "ok": False,
+        "detail": info.get("error", "Model interface is unavailable."),
     }
 
 
 def user_history_check(username):
     conn = get_connection()
     count = conn.execute(
-        "SELECT COUNT(*) FROM prediction_history WHERE username = ?",
+        "SELECT COUNT(*) FROM predictions WHERE username = ?",
         (username,),
     ).fetchone()[0]
     conn.close()

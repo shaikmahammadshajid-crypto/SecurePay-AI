@@ -3,31 +3,42 @@
 {% block content %}
 <section class="hero compact">
     <div>
-        <span class="kicker">Account workspace</span>
+        <span class="kicker">User profile</span>
         <h1>Profile</h1>
-        <p>Track personal usage and recent prediction activity.</p>
+        <p>Review your account details, saved prediction totals, average fraud probability, and recent fraud-detection activity.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button-link" href="{{ url_for('predict') }}">Manual Prediction</a>
+        <a class="button-link secondary" href="{{ url_for('reports') }}">Reports</a>
     </div>
 </section>
 
 <section class="grid two">
     <div class="panel">
         <h2>Account Details</h2>
-        <p>Username: <strong>{{ user.username }}</strong></p>
-        <p>Email: <strong>{{ user.email }}</strong></p>
-        <p>Role: <strong>{{ user.role }}</strong></p>
-        <p>Joined: <strong>{{ user.created_at }}</strong></p>
+        <dl class="detail-list">
+            <div><dt>Username</dt><dd>{{ user.username }}</dd></div>
+            <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+            <div><dt>Role</dt><dd>{{ user.role }}</dd></div>
+            <div><dt>Joined</dt><dd>{{ user.created_at }}</dd></div>
+        </dl>
     </div>
     <div class="panel">
         <h2>Prediction Statistics</h2>
-        <p>Total: <strong>{{ summary.total }}</strong></p>
-        <p>Fraud: <strong>{{ summary.fraud }}</strong></p>
-        <p>Genuine: <strong>{{ summary.genuine }}</strong></p>
-        <p>Average probability: <strong>{{ summary.average_probability }}%</strong></p>
+        <div class="mini-metrics">
+            <span><strong data-count="{{ summary.total }}">0</strong> total</span>
+            <span><strong data-count="{{ summary.fraud }}">0</strong> fraud</span>
+            <span><strong data-count="{{ summary.average_probability }}" data-suffix="%">0%</strong> avg probability</span>
+        </div>
+        <p class="muted">{{ summary.latest }}</p>
     </div>
 </section>
 
-<section class="panel">
-    <h2>Recent Predictions</h2>
+<section class="panel" data-table-panel>
+    <div class="panel-head">
+        <h2>Recent Predictions</h2>
+        <input class="table-search" data-table-search type="search" placeholder="Search recent predictions">
+    </div>
     {% set rows = rows %}
     {% include "partials/simple_table.html" %}
 </section>

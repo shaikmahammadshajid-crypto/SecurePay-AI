@@ -3,34 +3,114 @@
 {% block content %}
 <section class="hero compact">
     <div>
-        <span class="kicker">Fraud intelligence</span>
+        <span class="kicker">Fraud analytics</span>
         <h1>Analytics</h1>
-        <p>Upload a labeled dataset to inspect fraud concentration and high-amount fraud examples.</p>
+        <p>Review prediction volume, fraud percentage, risk distribution, probability spread, transaction amount distribution, and available model metrics.</p>
+    </div>
+    <div class="hero-actions">
+        <a class="button-link secondary" href="{{ url_for('batch') }}">Batch Prediction</a>
+        <a class="button-link secondary" href="{{ url_for('reports') }}">Reports</a>
     </div>
 </section>
 
-<form class="panel" method="post" enctype="multipart/form-data">
-    <label>Labeled CSV<input name="csv_file" type="file" accept=".csv" required></label>
-    <button type="submit">Analyze Dataset</button>
-</form>
+<section class="metrics metric-strip">
+    <div><span>Total Predictions</span><strong data-count="{{ stats.predictions }}">0</strong></div>
+    <div><span>Fraud Predictions</span><strong data-count="{{ stats.frauds }}">0</strong></div>
+    <div><span>Genuine Predictions</span><strong data-count="{{ stats.genuine }}">0</strong></div>
+    <div><span>Fraud Percentage</span><strong data-count="{{ stats.fraud_rate }}" data-suffix="%">0%</strong></div>
+</section>
 
-{% if metrics %}
-<section class="metrics">
-    <div><span>Transactions</span><strong>{{ metrics.total }}</strong></div>
-    <div><span>Frauds</span><strong>{{ metrics.fraud }}</strong></div>
-    <div><span>Fraud Rate</span><strong>{{ metrics.fraud_rate }}%</strong></div>
-    <div><span>Avg Amount</span><strong>${{ metrics.average_amount }}</strong></div>
+<section class="metrics metric-strip">
+    <div><span>Avg Fraud Probability</span><strong data-count="{{ stats.average_probability }}" data-suffix="%">0%</strong></div>
+    <div><span>Avg Transaction Amount</span><strong>${{ stats.average_amount }}</strong></div>
+    <div><span>High Risk</span><strong data-count="{{ stats.high_risk }}">0</strong></div>
+    <div><span>Batch Jobs</span><strong data-count="{{ stats.batches }}">0</strong></div>
+</section>
+
+<section class="grid two">
+    <div class="panel chart-panel">
+        <h2>Fraud vs Genuine</h2>
+        {% if charts.fraud %}{{ charts.fraud|safe }}{% else %}<div class="empty-state"><strong>No prediction data</strong><p>Run predictions to populate analytics.</p></div>{% endif %}
+    </div>
+    <div class="panel chart-panel">
+        <h2>Risk Distribution</h2>
+        {% if charts.risk %}{{ charts.risk|safe }}{% else %}<div class="empty-state"><strong>No risk data</strong><p>Risk distribution appears after predictions are saved.</p></div>{% endif %}
+    </div>
+</section>
+
+<section class="grid two">
+    <div class="panel chart-panel">
+        <h2>Prediction Trends</h2>
+        {% if charts.trend %}{{ charts.trend|safe }}{% else %}<div class="empty-state"><strong>No trend data</strong><p>Saved predictions create trend data.</p></div>{% endif %}
+    </div>
+    <div class="panel chart-panel">
+        <h2>Fraud Probability Distribution</h2>
+        {% if charts.probability %}{{ charts.probability|safe }}{% else %}<div class="empty-state"><strong>No probability data</strong><p>Probability charts require model outputs.</p></div>{% endif %}
+    </div>
+</section>
+
+<section class="panel chart-panel">
+    <h2>Transaction Amount Distribution</h2>
+    {% if charts.amount %}{{ charts.amount|safe }}{% else %}<div class="empty-state"><strong>No amount data</strong><p>Amount distribution appears after manual predictions.</p></div>{% endif %}
 </section>
 
 <section class="grid two">
     <div class="panel">
-        <h2>Dataset Preview</h2>
-        {% set rows = preview %}
+        <h2>Model Metrics</h2>
+        <dl class="detail-list">
+            <div><dt>Model</dt><dd>{{ model_info.model_name }}</dd></div>
+            <div><dt>Type</dt><dd>{{ model_info.model_type or "Unavailable" }}</dd></div>
+            <div><dt>Status</dt><dd>{{ model_info.status }}</dd></div>
+            <div><dt>Features</dt><dd>{{ model_info.feature_count }}</dd></div>
+            <div><dt>Probability</dt><dd>{{ "Supported" if model_info.probability_supported else "Unavailable" }}</dd></div>
+        </dl>
+        <pre class="metrics-text">{{ model_info.metrics }}</pre>
+    </div>
+    <form class="panel upload-panel" method="post" enctype="multipart/form-data">
+        <h2>Labeled Dataset Check</h2>
+        <label class="dropzone" data-dropzone>
+            <input name="csv_file" type="file" accept=".csv" required>
+            <span data-file-label>Drop labeled CSV here or browse</span>
+            <small>Requires Amount and Class</small>
+        </label>
+        <button type="submit">Analyze Labeled CSV</button>
+    </form>
+</section>
+
+{% if uploaded_metrics %}
+<section class="metrics metric-strip">
+    <div><span>Labeled Rows</span><strong data-count="{{ uploaded_metrics.total }}">0</strong></div>
+    <div><span>Confirmed Fraud</span><strong data-count="{{ uploaded_metrics.fraud }}">0</strong></div>
+    <div><span>Fraud Rate</span><strong data-count="{{ uploaded_metrics.fraud_rate }}" data-suffix="%">0%</strong></div>
+    <div><span>Fraud Exposure</span><strong>${{ uploaded_metrics.fraud_amount }}</strong></div>
+</section>
+
+<section class="grid two">
+    <div class="panel chart-panel">
+        <h2>Labeled Fraud Distribution</h2>
+        {% if uploaded_charts.fraud_distribution %}{{ uploaded_charts.fraud_distribution|safe }}{% endif %}
+    </div>
+    <div class="panel chart-panel">
+        <h2>Labeled Amount Distribution</h2>
+        {% if uploaded_charts.amount_distribution %}{{ uploaded_charts.amount_distribution|safe }}{% endif %}
+    </div>
+</section>
+
+<section class="grid two">
+    <div class="panel" data-table-panel>
+        <div class="panel-head">
+            <h2>Dataset Preview</h2>
+            <input class="table-search" data-table-search type="search" placeholder="Search preview">
+        </div>
+        {% set rows = uploaded_preview %}
         {% include "partials/simple_table.html" %}
     </div>
-    <div class="panel">
-        <h2>Top Fraud Transactions</h2>
-        {% set rows = top_fraud %}
+    <div class="panel" data-table-panel>
+        <div class="panel-head">
+            <h2>Top Fraud Transactions</h2>
+            <input class="table-search" data-table-search type="search" placeholder="Search fraud rows">
+        </div>
+        {% set rows = uploaded_top_fraud %}
         {% include "partials/simple_table.html" %}
     </div>
 </section>
