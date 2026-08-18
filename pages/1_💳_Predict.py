@@ -13,6 +13,7 @@ from utils.ai_assistant import (
 )
 from utils.model_loader import load_model, load_scaler
 from utils.prediction import predict_transaction
+from utils.prediction import FEATURE_COLUMNS
 from utils.charts import fraud_gauge
 
 from utils.helpers import (
@@ -23,7 +24,6 @@ from utils.helpers import (
 )
 
 from database.history import save_prediction
-from reports.pdf_generator import generate_prediction_report
 
 
 # -----------------------------
@@ -244,17 +244,9 @@ Recommended Actions
 
     st.subheader("🧠 Explainable AI")
 
-    feature_columns = [
-        "Time",
-        "V1","V2","V3","V4","V5","V6","V7","V8","V9",
-        "V10","V11","V12","V13","V14","V15","V16","V17",
-        "V18","V19","V20","V21","V22","V23","V24","V25",
-        "V26","V27","V28","Amount"
-    ]
-
     input_df = pd.DataFrame(
         [input_data],
-        columns=feature_columns
+        columns=FEATURE_COLUMNS
     )
 
     show_shap_explanation(
@@ -299,6 +291,7 @@ Recommended Actions
     # -----------------------------
 
     try:
+        from reports.pdf_generator import generate_prediction_report
 
         pdf_file = generate_prediction_report(
             username=st.session_state.get("username", "Guest"),

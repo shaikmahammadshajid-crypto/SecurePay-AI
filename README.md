@@ -30,12 +30,16 @@ This project demonstrates the practical application of Artificial Intelligence a
 - 💳 Real-Time Credit Card Fraud Prediction
 - 📂 Batch CSV Fraud Detection
 - 📊 Interactive Analytics Dashboard
+- 🤖 Personalized AI Assistant Command Center
+- 🩺 Model and App Health Checks
+- 📄 AI-Generated Audit Reports
 - 📈 Fraud Detection Statistics
 - 📜 Prediction History
 - 📄 PDF Report Generation
 - 📥 CSV Export
 - 🗄️ SQLite Database Integration
 - 🎨 Modern Responsive Streamlit UI
+- ✅ Automated Pytest Reliability Suite
 
 ---
 
@@ -140,6 +144,20 @@ pip install -r requirements.txt
 
 ```bash
 streamlit run app.py
+```
+
+## Run Tests
+
+```bash
+python -m pytest -q
+```
+
+## Retrain Model
+
+Place the credit card fraud dataset at `dataset/creditcard.csv`, then run:
+
+```bash
+python scripts/train_model.py
 ```
 
 ---

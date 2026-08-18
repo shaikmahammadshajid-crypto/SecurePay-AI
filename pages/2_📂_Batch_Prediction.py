@@ -1,14 +1,12 @@
-import uuid
-
 from utils.auth_guard import require_login
 from database.db import get_connection
-from reports.pdf_generator import generate_batch_report
 import streamlit as st
 import pandas as pd
 
 from config import setup_page, load_css
 from utils.ai_assistant import render_ai_assistant, render_batch_ai_assessment
 from utils.model_loader import load_model, load_scaler
+from utils.prediction import predict_batch
 
 # --------------------------------------------------
 # Page Configuration
@@ -56,47 +54,6 @@ if uploaded_file:
     st.dataframe(df.head())
 
     # --------------------------------------------------
-    # Validate Columns
-    # --------------------------------------------------
-
-    expected_columns = [
-        "Time",
-        "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9",
-        "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17",
-        "V18", "V19", "V20", "V21", "V22", "V23", "V24",
-        "V25", "V26", "V27", "V28",
-        "Amount"
-    ]
-
-    # Remove the target column if it exists
-    if "Class" in df.columns:
-        df = df.drop(columns=["Class"])
-
-    # Check for missing columns
-    missing_columns = [col for col in expected_columns if col not in df.columns]
-
-    if missing_columns:
-        st.error(f"❌ Missing required columns: {missing_columns}")
-        st.stop()
-
-    # Reorder columns to exactly match the model
-    df = df[expected_columns]
-    # Verify the dataset has exactly 30 features
-
-    if df.shape[1] != 30:
-        st.error("❌ Expected exactly 30 input features.")
-        st.stop()
-
-
-    # Convert all values to numeric
-    df = df.apply(pd.to_numeric, errors="coerce")
-
-    # Check for invalid or missing values
-    if df.isnull().values.any():
-        st.error("❌ The uploaded CSV contains invalid or missing values.")
-        st.stop()
-
-    # --------------------------------------------------
     # Predict Button
     # --------------------------------------------------
 
@@ -104,17 +61,11 @@ if uploaded_file:
 
         with st.spinner("🔍 Running AI Fraud Detection..."):
 
-            # Scale Data
-            scaled = scaler.transform(df)
-
-            # Make Predictions
-            predictions = model.predict(scaled)
-            probabilities = model.predict_proba(scaled)[:, 1]
-
-            # Create Results DataFrame
-            results = df.copy()
-            results["Prediction"] = predictions
-            results["Fraud Probability"] = probabilities
+            try:
+                results, predictions, probabilities = predict_batch(model, scaler, df)
+            except ValueError as e:
+                st.error(f"❌ {e}")
+                st.stop()
 
             # Calculate Statistics
             fraud = (predictions == 1).sum()
@@ -196,6 +147,8 @@ if uploaded_file:
 
             # Generate PDF
             try:
+                from reports.pdf_generator import generate_batch_report
+
                 pdf_file = generate_batch_report(
                     username=st.session_state.get("username", "Guest"),
                     df=results,

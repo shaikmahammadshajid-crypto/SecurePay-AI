@@ -1,7 +1,11 @@
 import bcrypt
 import sqlite3
+import re
 
 from database.db import get_connection
+
+
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 def normalize_username(username):
@@ -33,6 +37,9 @@ def register_account(username, email, password):
 
     if len(password) < 6:
         return False, "Password must be at least 6 characters."
+
+    if not EMAIL_PATTERN.match(email):
+        return False, "Enter a valid email address."
 
     conn = get_connection()
     cursor = conn.cursor()
