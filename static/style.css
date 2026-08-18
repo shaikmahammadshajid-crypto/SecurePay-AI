@@ -70,6 +70,11 @@ a {
     gap: 0.35rem;
 }
 
+.nav-public {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 0.8rem;
+}
+
 .nav a,
 .session-box a {
     text-decoration: none;
@@ -244,6 +249,21 @@ button:hover,
     margin: 1rem 0;
 }
 
+.workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.workflow-steps span {
+    background: #f0f7f6;
+    border: 1px solid #c9e7e3;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-weight: 750;
+    color: #174642;
+}
+
 .quick-actions a {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -362,7 +382,8 @@ th {
     .metrics,
     .result-band,
     .field-grid,
-    .hero-metrics {
+    .hero-metrics,
+    .workflow-steps {
         grid-template-columns: 1fr;
     }
 

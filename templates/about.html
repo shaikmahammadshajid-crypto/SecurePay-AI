@@ -3,13 +3,21 @@
 {% block content %}
 <section class="hero">
     <div>
-        <span class="kicker">Render web service</span>
+        <span class="kicker">Project meaning and purpose</span>
         <h1>About SecurePay AI</h1>
-        <p>SecurePay AI is now a Flask application deployed directly on Render. It uses a trained Random Forest model, SQLite audit storage, bcrypt authentication, batch inference, and assistant-driven operational workflows.</p>
+        <p>SecurePay AI solves a practical financial cybersecurity problem: identifying fraudulent card payments early enough for an analyst or bank system to review, verify, hold, or approve the transaction responsibly.</p>
     </div>
 </section>
 
 <section class="grid two">
+    <div class="panel">
+        <h2>Main Task</h2>
+        <p>Input transaction features, scale them with the trained scaler, classify the payment with a Random Forest model, and return fraud probability, risk level, recommendation, and audit history.</p>
+    </div>
+    <div class="panel">
+        <h2>Why It Matters</h2>
+        <p>Fraud losses are expensive and real fraud cases are rare, so the app focuses on probability-based triage, review workflow, and evidence storage instead of only showing a prediction label.</p>
+    </div>
     <div class="panel">
         <h2>Model</h2>
         <p>Random Forest classifier with 30 transaction signals: Time, V1-V28, and Amount.</p>

@@ -17,6 +17,11 @@
                 </span>
             </a>
 
+            <nav class="nav nav-public">
+                <a href="{{ url_for('reviewer_guide') }}">Reviewer Guide</a>
+                <a href="{{ url_for('presentation_download') }}">Presentation File</a>
+            </nav>
+
             {% if current_username %}
             <nav class="nav">
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>

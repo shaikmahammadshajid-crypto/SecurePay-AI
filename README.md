@@ -15,6 +15,20 @@ SecurePay AI is a Render-hosted Flask web application for credit card fraud dete
 - Reproducible model training script
 - Automated pytest reliability suite
 
+## Main Task
+
+The main task of SecurePay AI is to detect potentially fraudulent credit card transactions. The app accepts transaction features, predicts whether the transaction is genuine or fraud, calculates fraud probability, assigns a risk level, recommends an action, and stores the result for audit.
+
+## Reviewer Preparation
+
+- Open the live app and select **Reviewer Guide**.
+- Register or login.
+- Open **Predict** and use a demo transaction.
+- Review the prediction, fraud probability, risk level, and recommendation.
+- Open **History** to show saved audit records.
+- Open **AI Assistant** and run `check app health`, `summarize my activity`, or `generate my audit report`.
+- Download the presentation file from **Presentation File** or from `docs/SecurePayAI_Presentation.md`.
+
 ## Technology Stack
 
 - Runtime: Flask + Gunicorn on Render

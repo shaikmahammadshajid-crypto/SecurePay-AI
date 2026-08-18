@@ -3,9 +3,9 @@
 {% block content %}
 <section class="hero">
     <div>
-        <span class="kicker">Render-hosted fraud workspace</span>
+        <span class="kicker">Final year AI fraud detection project</span>
         <h1>SecurePay AI</h1>
-        <p>Score payments, screen CSV batches, monitor risk, and generate audit-ready reports from a standard Render web service.</p>
+        <p>The main task of this project is to detect suspicious credit card transactions using machine learning, explain the risk to users, and preserve every prediction for review and audit.</p>
     </div>
     <div class="hero-metrics">
         <span><strong>30</strong> model signals</span>
@@ -31,5 +31,11 @@
         <label>Password<input name="password" type="password" minlength="6" autocomplete="new-password" required></label>
         <button type="submit">Create Account</button>
     </form>
+</section>
+
+<section class="panel">
+    <h2>Reviewer Quick Start</h2>
+    <p>This project demonstrates a complete fraud-review workflow: create an account, score a transaction, review the AI recommendation, check history, generate an audit report, and verify system health.</p>
+    <a class="button-link" href="{{ url_for('reviewer_guide') }}">Open Reviewer Guide</a>
 </section>
 {% endblock %}

@@ -27,3 +27,23 @@ def test_dashboard_requires_login():
 
     assert response.status_code == 302
     assert "/login" in response.headers["Location"]
+
+
+def test_reviewer_guide_is_public_and_explains_main_task():
+    client = app.test_client()
+
+    response = client.get("/reviewer-guide")
+
+    assert response.status_code == 200
+    assert b"Main Task of the Project" in response.data
+    assert b"credit card transactions" in response.data
+
+
+def test_presentation_document_downloads():
+    client = app.test_client()
+
+    response = client.get("/presentation-download")
+
+    assert response.status_code == 200
+    assert response.headers["Content-Disposition"].startswith("attachment;")
+    assert b"Final Project Presentation" in response.data

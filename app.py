@@ -52,6 +52,35 @@ ROUTES = {
     "admin": "admin",
     "assistant": "assistant",
     "about": "about",
+    "reviewer": "reviewer_guide",
+}
+
+
+DEMO_TRANSACTIONS = {
+    "baseline": {
+        "label": "Baseline Review Transaction",
+        "description": "A simple low-complexity transaction profile for demonstrating the full prediction workflow.",
+        "values": {
+            **{column: "0" for column in FEATURE_COLUMNS},
+            "Amount": "100",
+        },
+    },
+    "high_amount": {
+        "label": "High Amount Review Transaction",
+        "description": "A larger payment profile that helps reviewers see probability, risk level, and recommendation behavior.",
+        "values": {
+            **{column: "0" for column in FEATURE_COLUMNS},
+            "Time": "86400",
+            "V1": "-1.35",
+            "V2": "1.12",
+            "V3": "-0.92",
+            "V4": "2.44",
+            "V7": "1.38",
+            "V10": "-1.21",
+            "V14": "-1.72",
+            "Amount": "1499",
+        },
+    },
 }
 
 
@@ -168,6 +197,12 @@ def dashboard():
 def predict():
     form_values = {column: "0" for column in FEATURE_COLUMNS}
     form_values["Amount"] = "100"
+    selected_demo = request.args.get("demo")
+    demo_info = None
+    if request.method == "GET" and selected_demo in DEMO_TRANSACTIONS:
+        demo_info = DEMO_TRANSACTIONS[selected_demo]
+        form_values.update(demo_info["values"])
+
     result = None
 
     if request.method == "POST":
@@ -223,6 +258,8 @@ def predict():
         title="Predict",
         feature_columns=FEATURE_COLUMNS,
         form_values=form_values,
+        demo_transactions=DEMO_TRANSACTIONS,
+        demo_info=demo_info,
         result=result,
     )
 
@@ -462,6 +499,20 @@ def download_audit_report():
 @app.get("/about")
 def about():
     return render_template("about.html", title="About")
+
+
+@app.get("/reviewer-guide")
+def reviewer_guide():
+    return render_template("reviewer_guide.html", title="Reviewer Guide")
+
+
+@app.get("/presentation-download")
+def presentation_download():
+    return send_file(
+        "docs/SecurePayAI_Presentation.md",
+        as_attachment=True,
+        download_name="SecurePayAI_Presentation.md",
+    )
 
 
 if __name__ == "__main__":

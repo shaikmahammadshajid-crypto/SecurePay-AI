@@ -3,9 +3,20 @@
 {% block content %}
 <section class="hero">
     <div>
-        <span class="kicker">Live fraud operations workspace</span>
-        <h1>Dashboard</h1>
-        <p>Monitor account activity, system readiness, prediction totals, and next actions from one Render-hosted web app.</p>
+        <span class="kicker">Main project task</span>
+        <h1>Credit Card Fraud Detection</h1>
+        <p>SecurePay AI predicts whether a card transaction is genuine or fraudulent, shows the probability and recommended action, then stores the result for investigation and audit.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>How to Use This Project</h2>
+    <div class="workflow-steps">
+        <span>1. Login or register</span>
+        <span>2. Predict one payment or upload a batch CSV</span>
+        <span>3. Review risk level and AI recommendation</span>
+        <span>4. Save history and generate audit evidence</span>
+        <span>5. Use AI Assistant or Admin tools for review</span>
     </div>
 </section>
 
@@ -35,8 +46,10 @@
 
 <section class="quick-actions">
     <a href="{{ url_for('predict') }}">Score One Payment</a>
+    <a href="{{ url_for('predict', demo='baseline') }}">Try Demo Prediction</a>
     <a href="{{ url_for('batch') }}">Screen a CSV Batch</a>
     <a href="{{ url_for('assistant') }}">Run AI Assistant</a>
     <a href="{{ url_for('download_audit_report') }}">Download Audit Report</a>
+    <a href="{{ url_for('reviewer_guide') }}">Reviewer Guide</a>
 </section>
 {% endblock %}
