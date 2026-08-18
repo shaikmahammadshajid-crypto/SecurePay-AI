@@ -1,37 +1,37 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, trust_strip, insight_card %}
 
 {% block content %}
-<section class="hero app-hero">
-    <div>
-        <span class="kicker">About SecurePay AI</span>
-        <h1>AI-Powered Credit Card Fraud Detection System</h1>
-        <p>SecurePay AI Version 1 scores credit-card transaction features with a trained Random Forest model, classifies risk, saves audit history, explains predictions when SHAP is compatible, and generates reports.</p>
-    </div>
-    <div class="security-visual">
-        <div class="risk-ring" data-risk-meter="68">
-            <span>30</span>
-            <small>features</small>
-        </div>
-        <div class="signal-lanes">
-            <span style="--lane: 100%"><b>Exact feature order</b></span>
-            <span style="--lane: 82%"><b>Random Forest</b></span>
-            <span style="--lane: 70%"><b>SHAP attribution</b></span>
-        </div>
-    </div>
-</section>
+{{ page_header(
+    "About SecurePay AI",
+    "AI-Powered Credit Card Fraud Detection System",
+    "SecurePay AI Version 1 scores credit-card transaction features with a trained Random Forest model, classifies risk, saves audit history, explains predictions when SHAP is compatible, and generates reports.",
+    "Manual Prediction",
+    url_for('predict') if current_username else url_for('login'),
+    "Sample CSV",
+    url_for('sample_batch_csv'),
+    ["Exact feature order", "Random Forest", "SHAP attribution"]
+) }}
+
+{{ trust_strip([
+    {"label": "Feature contract", "value": "30 inputs"},
+    {"label": "Classifier", "value": "Random Forest"},
+    {"label": "Preprocessing", "value": "StandardScaler"},
+    {"label": "Audit output", "value": "PDF + SQLite"}
+]) }}
 
 <section class="app-card-grid">
-    <a class="app-card" href="{{ url_for('predict') }}">
+    <a class="app-card" href="{{ url_for('predict') if current_username else url_for('login') }}">
         <span class="app-card-icon">MP</span>
         <strong>Manual Prediction</strong>
         <p>Analyze one transaction with all 30 required model features.</p>
     </a>
-    <a class="app-card" href="{{ url_for('batch') }}">
+    <a class="app-card" href="{{ url_for('batch') if current_username else url_for('login') }}">
         <span class="app-card-icon">CSV</span>
         <strong>Batch Prediction</strong>
         <p>Validate a CSV and score every transaction row.</p>
     </a>
-    <a class="app-card" href="{{ url_for('analytics') }}">
+    <a class="app-card" href="{{ url_for('analytics') if current_username else url_for('login') }}">
         <span class="app-card-icon">AN</span>
         <strong>Analytics</strong>
         <p>Inspect fraud rates, probability distributions, trends, and amount patterns.</p>
@@ -64,6 +64,12 @@
             <div><dt>Features</dt><dd>{{ model_info.feature_count }}</dd></div>
         </dl>
     </div>
+</section>
+
+<section class="insight-grid" aria-label="Responsible product notes">
+    {{ insight_card("Explainability", "SHAP values describe model feature attribution for this prediction. They do not prove causality.", "Shown where compatible.") }}
+    {{ insight_card("Decision Support", "SecurePay AI helps prioritize fraud review but does not guarantee fraud or genuine behavior.", "Use with operational review.", "warning") }}
+    {{ insight_card("Version 1 Scope", "The project stays focused on credit-card fraud detection and does not include UPI, wallet, or payment-gateway features.", "Scope stays clear.") }}
 </section>
 
 <section class="panel">

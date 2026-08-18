@@ -1,23 +1,29 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, metric_card, insight_card, empty_state %}
 
 {% block content %}
-<section class="hero compact">
-    <div>
-        <span class="kicker">PDF and export center</span>
-        <h1>Reports</h1>
-        <p>Create professional fraud-detection reports for single transactions, audit history, and recent batch jobs.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link" href="{{ url_for('download_audit_report') }}">Download Audit PDF</a>
-        <a class="button-link secondary" href="{{ url_for('batch') }}">Batch Prediction</a>
-    </div>
-</section>
+{{ page_header(
+    "PDF and export center",
+    "Reports",
+    "Create professional fraud-detection reports for single transactions, audit history, and recent batch jobs.",
+    "Download Audit PDF",
+    url_for('download_audit_report'),
+    "Batch Prediction",
+    url_for('batch'),
+    ["SecurePay AI branding", "Model information", "Decision-support disclaimer"]
+) }}
 
 <section class="metrics metric-strip">
-    <div><span>Total Predictions</span><strong data-count="{{ summary.total }}">0</strong></div>
-    <div><span>Fraud Predictions</span><strong data-count="{{ summary.fraud }}">0</strong></div>
-    <div><span>Genuine Predictions</span><strong data-count="{{ summary.genuine }}">0</strong></div>
-    <div><span>Avg Fraud Probability</span><strong data-count="{{ summary.average_probability }}" data-suffix="%">0%</strong></div>
+    {{ metric_card("Total Predictions", summary.total, "", "Included in audit scope") }}
+    {{ metric_card("Fraud Predictions", summary.fraud, "", "Flagged records", "danger") }}
+    {{ metric_card("Genuine Predictions", summary.genuine, "", "Genuine records", "success") }}
+    {{ metric_card("Avg Fraud Probability", summary.average_probability, "%", "Report-level mean") }}
+</section>
+
+<section class="insight-grid" aria-label="Report guidance">
+    {{ insight_card("Single Reports", "Include transaction ID, prediction, fraud probability, amount, model, timestamp, and SHAP attribution when available.", "Use from recent prediction rows.") }}
+    {{ insight_card("Audit Reports", "Summarize saved prediction history with model status and recent decisions.", "Useful for review packets.") }}
+    {{ insight_card("Batch Reports", "Batch PDFs are generated after successful CSV screening and summarize total, fraud, genuine, and fraud rate.", "Export from Batch Prediction.") }}
 </section>
 
 <section class="grid two">
@@ -79,10 +85,7 @@
         </table>
     </div>
     {% else %}
-    <div class="empty-state">
-        <strong>No reports yet</strong>
-        <p>Analyze a transaction to enable single-transaction reports.</p>
-    </div>
+    {{ empty_state("No reports yet", "Analyze a transaction to enable single-transaction reports.", url_for('predict'), "Analyze Transaction") }}
     {% endif %}
 </section>
 

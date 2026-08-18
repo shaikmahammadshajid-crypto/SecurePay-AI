@@ -1,23 +1,36 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, metric_card, trust_strip, insight_card, empty_state %}
 
 {% block content %}
-<section class="hero">
-    <div>
-        <span class="kicker">Fraud analytics workspace</span>
-        <h1>Dashboard</h1>
-        <p>Monitor your saved credit-card fraud predictions, recent model decisions, average risk, and system readiness.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link" href="{{ url_for('predict') }}">Manual Prediction</a>
-        <a class="button-link secondary" href="{{ url_for('batch') }}">Batch CSV Prediction</a>
-    </div>
+{{ page_header(
+    "Secure payments command center",
+    "Risk Dashboard",
+    "Monitor saved credit-card fraud predictions, review model readiness, and move quickly from risk signals to audit-ready reports.",
+    "Manual Prediction",
+    url_for('predict'),
+    "Batch CSV Prediction",
+    url_for('batch'),
+    ["Random Forest model", "30-feature schema", "SQLite audit trail"]
+) }}
+
+{{ trust_strip([
+    {"label": "Session security", "value": "HTTP-only cookies"},
+    {"label": "Model pipeline", "value": "Scaler + Random Forest"},
+    {"label": "Audit storage", "value": "SQLite history"},
+    {"label": "Explainability", "value": "SHAP-ready"}
+]) }}
+
+<section class="metrics metric-strip" aria-label="Transaction summary metrics">
+    {{ metric_card("Total Transactions", summary.total, "", "Saved single-transaction decisions") }}
+    {{ metric_card("Fraud Detected", summary.fraud, "", "Flagged by the model", "danger") }}
+    {{ metric_card("Genuine Transactions", summary.genuine, "", "Classified as genuine", "success") }}
+    {{ metric_card("Avg Fraud Probability", summary.average_probability, "%", "Across saved predictions") }}
 </section>
 
-<section class="metrics metric-strip">
-    <div><span>Total Transactions</span><strong data-count="{{ summary.total }}">0</strong></div>
-    <div><span>Fraud Detected</span><strong data-count="{{ summary.fraud }}">0</strong></div>
-    <div><span>Genuine Transactions</span><strong data-count="{{ summary.genuine }}">0</strong></div>
-    <div><span>Avg Fraud Probability</span><strong data-count="{{ summary.average_probability }}" data-suffix="%">0%</strong></div>
+<section class="insight-grid" aria-label="AI risk insights">
+    {{ insight_card("AI Insight", summary.latest, "Review recent predictions before exporting reports.") }}
+    {{ insight_card("Fraud Alert", stats.high_risk ~ " high-risk records require attention.", "Prioritize HIGH and CRITICAL bands.", "warning") }}
+    {{ insight_card("Audit Readiness", readiness.message, "System checks are shown below.") }}
 </section>
 
 <section class="grid two">
@@ -56,17 +69,17 @@
 <section class="grid two">
     <div class="panel chart-panel">
         <h2>Fraud vs Genuine</h2>
-        {% if charts.fraud %}{{ charts.fraud|safe }}{% else %}<div class="empty-state"><strong>No chart data</strong><p>Run a prediction to populate this chart.</p></div>{% endif %}
+        {% if charts.fraud %}{{ charts.fraud|safe }}{% else %}{{ empty_state("No chart data", "Run a prediction to populate this chart.", url_for('predict'), "Analyze Transaction") }}{% endif %}
     </div>
     <div class="panel chart-panel">
         <h2>Risk Distribution</h2>
-        {% if charts.risk %}{{ charts.risk|safe }}{% else %}<div class="empty-state"><strong>No chart data</strong><p>Risk bands appear after predictions are saved.</p></div>{% endif %}
+        {% if charts.risk %}{{ charts.risk|safe }}{% else %}{{ empty_state("No chart data", "Risk bands appear after predictions are saved.", url_for('predict'), "Analyze Transaction") }}{% endif %}
     </div>
 </section>
 
 <section class="panel chart-panel">
     <h2>Activity Trend</h2>
-    {% if charts.trend %}{{ charts.trend|safe }}{% else %}<div class="empty-state"><strong>No trend yet</strong><p>Saved predictions create the trend line.</p></div>{% endif %}
+    {% if charts.trend %}{{ charts.trend|safe }}{% else %}{{ empty_state("No trend yet", "Saved predictions create the trend line.", url_for('predict'), "Create First Record") }}{% endif %}
 </section>
 
 <section class="grid two">

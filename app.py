@@ -1,5 +1,7 @@
 import logging
 import os
+import hmac
+import secrets
 from io import StringIO
 from pathlib import Path
 from uuid import uuid4
@@ -175,8 +177,29 @@ def admin_required(view):
     return wrapped
 
 
+@app.before_request
+def protect_forms_from_csrf():
+    """Reject cross-site POSTs before they reach a state-changing route."""
+    if request.method != "POST":
+        return None
+
+    expected_token = session.get("csrf_token")
+    submitted_token = request.form.get("csrf_token", "")
+    if expected_token and hmac.compare_digest(expected_token, submitted_token):
+        return None
+
+    logger.warning("Rejected a form submission with an invalid CSRF token on %s", request.path)
+    flash("Your form expired or could not be verified. Please try again.", "error")
+    return redirect(request.path)
+
+
 @app.context_processor
 def inject_layout_context():
+    csrf_token = session.get("csrf_token")
+    if not csrf_token:
+        csrf_token = secrets.token_urlsafe(32)
+        session["csrf_token"] = csrf_token
+
     return {
         "app_name": APP_NAME,
         "app_title": APP_TITLE,
@@ -187,6 +210,7 @@ def inject_layout_context():
         "home_endpoint": home_for_role(session.get("role")) if session.get("logged_in") else "login",
         "risk_thresholds": RISK_THRESHOLDS,
         "feature_columns": FEATURE_COLUMNS,
+        "csrf_token": csrf_token,
     }
 
 
@@ -328,6 +352,10 @@ def login():
             username = request.form.get("username", "")
             email = request.form.get("email", "")
             password = request.form.get("password", "")
+            password_confirmation = request.form.get("password_confirmation", "")
+            if password != password_confirmation:
+                flash("Passwords do not match.", "error")
+                return redirect(url_for("login"))
             success, message = register_account(username, email, password)
             if success:
                 session.clear()

@@ -1,23 +1,29 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, metric_card, insight_card, empty_state %}
 
 {% block content %}
-<section class="hero compact">
-    <div>
-        <span class="kicker">Administrator dashboard</span>
-        <h1>Admin Dashboard</h1>
-        <p>Monitor users, predictions, fraud rate, batch activity, model readiness, and role authorization for SecurePay AI Version 1.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link" href="{{ url_for('analytics') }}">Analytics</a>
-        <a class="button-link secondary" href="{{ url_for('reports') }}">Reports</a>
-    </div>
-</section>
+{{ page_header(
+    "Administrator dashboard",
+    "Admin Control Center",
+    "Monitor users, predictions, fraud rate, batch activity, model readiness, and role authorization for SecurePay AI Version 1.",
+    "Analytics",
+    url_for('analytics'),
+    "Reports",
+    url_for('reports'),
+    ["Server-side authorization", "Model readiness", "Role management"]
+) }}
 
 <section class="metrics metric-strip">
-    <div><span>Total Users</span><strong data-count="{{ stats.users }}">0</strong></div>
-    <div><span>Total Predictions</span><strong data-count="{{ stats.predictions }}">0</strong></div>
-    <div><span>Fraud Predictions</span><strong data-count="{{ stats.frauds }}">0</strong></div>
-    <div><span>Fraud Rate</span><strong data-count="{{ stats.fraud_rate }}" data-suffix="%">0%</strong></div>
+    {{ metric_card("Total Users", stats.users, "", "Registered accounts") }}
+    {{ metric_card("Total Predictions", stats.predictions, "", "Saved scoring events") }}
+    {{ metric_card("Fraud Predictions", stats.frauds, "", "Flagged records", "danger") }}
+    {{ metric_card("Fraud Rate", stats.fraud_rate, "%", "Platform fraud share") }}
+</section>
+
+<section class="insight-grid" aria-label="Admin insights">
+    {{ insight_card("System Posture", readiness.message, "Review checks before demos or deployment.") }}
+    {{ insight_card("Role Governance", "Admins can promote or demote user roles while preserving at least one admin.", "Authorization is enforced server-side.") }}
+    {{ insight_card("Model Operations", model_info.status ~ " " ~ (model_info.model_type or "model"), "Probability support: " ~ ("yes" if model_info.probability_supported else "no")) }}
 </section>
 
 <section class="grid two">
@@ -82,6 +88,7 @@
                     <td data-label="Created At">{{ user.created_at }}</td>
                     <td data-label="Manage Role">
                         <form class="inline-form" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <input type="hidden" name="user_id" value="{{ user.id }}">
                             <select name="role">
                                 <option value="user" {{ "selected" if user.role == "user" else "" }}>user</option>
@@ -96,7 +103,7 @@
         </table>
     </div>
     {% else %}
-    <div class="empty-state"><strong>No users</strong><p>No user accounts are available.</p></div>
+    {{ empty_state("No users", "No user accounts are available.") }}
     {% endif %}
 </section>
 

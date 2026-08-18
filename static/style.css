@@ -94,6 +94,7 @@ body.sidebar-collapsed .app-shell {
 
 body.sidebar-collapsed .brand span:not(.brand-mark),
 body.sidebar-collapsed .nav-label,
+body.sidebar-collapsed .nav-text,
 body.sidebar-collapsed .session-box strong,
 body.sidebar-collapsed .session-label,
 body.sidebar-collapsed .role-pill,
@@ -103,11 +104,10 @@ body.sidebar-collapsed .signout-link {
 
 body.sidebar-collapsed .nav-link {
     justify-content: center;
-    font-size: 0;
 }
 
-body.sidebar-collapsed .nav-icon {
-    font-size: 0.68rem;
+body.sidebar-collapsed .nav-link.active::after {
+    right: 0.35rem;
 }
 
 .sidebar {
@@ -188,14 +188,31 @@ body.sidebar-collapsed .nav-icon {
 .nav-icon {
     display: inline-grid;
     place-items: center;
+    flex: 0 0 auto;
     width: 30px;
     height: 30px;
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.08);
     color: #ddfffb;
-    font-size: 0.68rem;
-    font-weight: 900;
+}
+
+.nav-icon svg,
+.icon-control svg,
+.command-trigger svg,
+.ghost-button svg,
+.button-link svg,
+button svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+}
+
+.nav-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-link:hover,
@@ -305,6 +322,16 @@ html[data-theme="dark"] .status-pill[data-level="critical"] {
     padding: 0.4rem 0.7rem;
     font-size: 0.86rem;
     box-shadow: none;
+}
+
+.command-trigger,
+.icon-control {
+    gap: 0.45rem;
+}
+
+.icon-control {
+    width: 38px;
+    padding-inline: 0;
 }
 
 .command-trigger:hover,
@@ -1532,8 +1559,81 @@ html[data-theme="dark"] .list-stack span {
     }
 
     .sidebar {
-        position: static;
+        position: sticky;
+        top: 0;
+        z-index: 30;
         height: auto;
+        padding: 0.75rem;
+        display: grid;
+        gap: 0.65rem;
+        box-shadow: 0 12px 30px rgba(8, 14, 18, 0.24);
+    }
+
+    .brand {
+        min-height: 44px;
+    }
+
+    .brand-mark {
+        width: 38px;
+        height: 38px;
+    }
+
+    .brand small,
+    .nav-label,
+    .sidebar-trust,
+    .session-label {
+        display: none;
+    }
+
+    .nav,
+    .nav-public {
+        display: flex;
+        gap: 0.45rem;
+        overflow-x: auto;
+        padding-bottom: 0.15rem;
+        scrollbar-width: thin;
+    }
+
+    .nav-public {
+        border-bottom: 0;
+    }
+
+    .nav-link,
+    .signout-link {
+        min-height: 40px;
+        min-width: max-content;
+        padding: 0.45rem 0.6rem;
+        white-space: nowrap;
+    }
+
+    .nav-link.active {
+        box-shadow: inset 0 -3px 0 var(--primary);
+    }
+
+    .nav-link.active::after {
+        display: none;
+    }
+
+    .nav-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .session-box {
+        margin-top: 0;
+        border-top: 0;
+        padding-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        overflow-x: auto;
+    }
+
+    .session-box strong {
+        max-width: 44vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .content {
@@ -1544,6 +1644,26 @@ html[data-theme="dark"] .list-stack span {
     .panel-head {
         align-items: start;
         flex-direction: column;
+    }
+
+    .topbar {
+        position: static;
+    }
+
+    .topbar-status {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .command-trigger span,
+    .topbar-identity,
+    .status-dot {
+        display: none;
+    }
+
+    .command-trigger {
+        width: 38px;
+        padding-inline: 0;
     }
 
     .role-login-grid,
@@ -1638,9 +1758,8 @@ html[data-theme="dark"] .list-stack span {
     }
 
     body.sidebar-collapsed .brand span:not(.brand-mark),
-    body.sidebar-collapsed .nav-label,
+    body.sidebar-collapsed .nav-text,
     body.sidebar-collapsed .session-box strong,
-    body.sidebar-collapsed .session-label,
     body.sidebar-collapsed .role-pill {
         display: block;
     }
@@ -1651,6 +1770,5 @@ html[data-theme="dark"] .list-stack span {
 
     body.sidebar-collapsed .nav-link {
         justify-content: flex-start;
-        font-size: inherit;
     }
 }

@@ -10,7 +10,10 @@ from database.db import get_connection
 logger = logging.getLogger(__name__)
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+USERNAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_.-]{2,31}$")
 VALID_ROLES = {"user", "admin"}
+MINIMUM_PASSWORD_LENGTH = 8
+MAXIMUM_BCRYPT_PASSWORD_BYTES = 72
 
 
 def normalize_username(username):
@@ -32,10 +35,19 @@ def register_account(username, email, password):
     if not username or not email or not password:
         return False, "Username, email, and password are required."
 
-    if len(password) < 6:
-        return False, "Password must be at least 6 characters."
+    if not USERNAME_PATTERN.fullmatch(username):
+        return (
+            False,
+            "Username must be 3-32 characters and use lowercase letters, numbers, dots, hyphens, or underscores.",
+        )
 
-    if not EMAIL_PATTERN.match(email):
+    if len(password) < MINIMUM_PASSWORD_LENGTH:
+        return False, f"Password must be at least {MINIMUM_PASSWORD_LENGTH} characters."
+
+    if len(password.encode("utf-8")) > MAXIMUM_BCRYPT_PASSWORD_BYTES:
+        return False, "Password is too long. Use at most 72 UTF-8 bytes."
+
+    if len(email) > 254 or not EMAIL_PATTERN.fullmatch(email):
         return False, "Enter a valid email address."
 
     conn = get_connection()

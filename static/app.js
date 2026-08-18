@@ -32,6 +32,12 @@
         });
     }
 
+    function initIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
+        }
+    }
+
     function initShellControls() {
         const savedTheme = localStorage.getItem("securepay-theme");
         if (savedTheme === "dark" || savedTheme === "light") {
@@ -49,8 +55,10 @@
 
         const sidebarButton = $("[data-sidebar-toggle]");
         if (sidebarButton) {
+            sidebarButton.setAttribute("aria-pressed", String(document.body.classList.contains("sidebar-collapsed")));
             sidebarButton.addEventListener("click", () => {
                 document.body.classList.toggle("sidebar-collapsed");
+                sidebarButton.setAttribute("aria-pressed", String(document.body.classList.contains("sidebar-collapsed")));
             });
         }
     }
@@ -318,6 +326,21 @@
         });
     }
 
+    function initFormLoadingStates() {
+        $$("form").forEach((form) => {
+            const method = (form.getAttribute("method") || "get").toLowerCase();
+            if (method !== "post") return;
+
+            form.addEventListener("submit", () => {
+                form.classList.add("is-submitting");
+                const submitter = $("button[type='submit']", form);
+                if (submitter) {
+                    submitter.setAttribute("aria-busy", "true");
+                }
+            });
+        });
+    }
+
     function initRiskMeters() {
         $$("[data-risk-meter]").forEach((meter) => {
             const value = clamp(Number.parseFloat(meter.dataset.riskMeter || "0"), 0, 100);
@@ -326,6 +349,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        initIcons();
         initShellControls();
         animateNumbers();
         initCommandPalette();
@@ -335,5 +359,6 @@
         initRiskMeters();
         initRiskSimulator();
         initCharts();
+        initFormLoadingStates();
     });
 })();

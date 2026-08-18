@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ title or app_name }} | {{ app_name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='design-system.css') }}">
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
 </head>
 <body data-endpoint="{{ current_endpoint or '' }}" data-role="{{ current_role or 'public' }}">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="app-shell">
         <aside class="sidebar">
             <a class="brand" href="{{ url_for(home_endpoint) }}">
@@ -22,20 +25,26 @@
             <p class="nav-label">Workspace</p>
             <nav class="nav" aria-label="Application navigation">
                 {% if current_role == "admin" %}
-                <a class="nav-link {{ 'active' if current_endpoint == 'admin' else '' }}" href="{{ url_for('admin') }}"><span class="nav-icon">AD</span>Admin Dashboard</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'admin' else '' }}" href="{{ url_for('admin') }}" aria-label="Admin Dashboard" title="Admin Dashboard" {% if current_endpoint == 'admin' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="shield-check"></i></span><span class="nav-text">Admin Dashboard</span></a>
                 {% else %}
-                <a class="nav-link {{ 'active' if current_endpoint == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}"><span class="nav-icon">DB</span>Dashboard</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}" aria-label="Dashboard" title="Dashboard" {% if current_endpoint == 'dashboard' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="layout-dashboard"></i></span><span class="nav-text">Dashboard</span></a>
                 {% endif %}
-                <a class="nav-link {{ 'active' if current_endpoint == 'predict' else '' }}" href="{{ url_for('predict') }}"><span class="nav-icon">MP</span>Manual Prediction</a>
-                <a class="nav-link {{ 'active' if current_endpoint == 'batch' else '' }}" href="{{ url_for('batch') }}"><span class="nav-icon">CSV</span>Batch Prediction</a>
-                <a class="nav-link {{ 'active' if current_endpoint == 'analytics' else '' }}" href="{{ url_for('analytics') }}"><span class="nav-icon">AN</span>Analytics</a>
-                <a class="nav-link {{ 'active' if current_endpoint == 'history' else '' }}" href="{{ url_for('history') }}"><span class="nav-icon">HI</span>History</a>
-                <a class="nav-link {{ 'active' if current_endpoint == 'reports' else '' }}" href="{{ url_for('reports') }}"><span class="nav-icon">RP</span>Reports</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'predict' else '' }}" href="{{ url_for('predict') }}" aria-label="Manual Prediction" title="Manual Prediction" {% if current_endpoint == 'predict' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="scan-search"></i></span><span class="nav-text">Manual Prediction</span></a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'batch' else '' }}" href="{{ url_for('batch') }}" aria-label="Batch Prediction" title="Batch Prediction" {% if current_endpoint == 'batch' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="file-spreadsheet"></i></span><span class="nav-text">Batch Prediction</span></a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'analytics' else '' }}" href="{{ url_for('analytics') }}" aria-label="Analytics" title="Analytics" {% if current_endpoint == 'analytics' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="chart-no-axes-combined"></i></span><span class="nav-text">Analytics</span></a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'history' else '' }}" href="{{ url_for('history') }}" aria-label="History" title="History" {% if current_endpoint == 'history' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="history"></i></span><span class="nav-text">History</span></a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'reports' else '' }}" href="{{ url_for('reports') }}" aria-label="Reports" title="Reports" {% if current_endpoint == 'reports' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="file-text"></i></span><span class="nav-text">Reports</span></a>
                 {% if current_role != "admin" %}
-                <a class="nav-link {{ 'active' if current_endpoint == 'profile' else '' }}" href="{{ url_for('profile') }}"><span class="nav-icon">PR</span>Profile</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'profile' else '' }}" href="{{ url_for('profile') }}" aria-label="Profile" title="Profile" {% if current_endpoint == 'profile' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="user-round"></i></span><span class="nav-text">Profile</span></a>
                 {% endif %}
-                <a class="nav-link {{ 'active' if current_endpoint == 'about' else '' }}" href="{{ url_for('about') }}"><span class="nav-icon">IN</span>About</a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'about' else '' }}" href="{{ url_for('about') }}" aria-label="About" title="About" {% if current_endpoint == 'about' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="info"></i></span><span class="nav-text">About</span></a>
             </nav>
+            <div class="sidebar-trust">
+                <span>Trust posture</span>
+                <strong>Encrypted sessions</strong>
+                <strong>Auditable ML decisions</strong>
+                <strong>Role-based access</strong>
+            </div>
             <div class="session-box">
                 <span class="session-label">Signed in</span>
                 <strong>{{ current_username }}</strong>
@@ -43,6 +52,11 @@
                 <a class="signout-link" href="{{ url_for('logout') }}">Sign out</a>
             </div>
             {% else %}
+            <nav class="nav nav-public" aria-label="Public navigation">
+                <a class="nav-link {{ 'active' if current_endpoint == 'login' else '' }}" href="{{ url_for('login') }}" aria-label="Login" title="Login" {% if current_endpoint == 'login' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="log-in"></i></span><span class="nav-text">Login</span></a>
+                <a class="nav-link {{ 'active' if current_endpoint == 'about' else '' }}" href="{{ url_for('about') }}" aria-label="About" title="About" {% if current_endpoint == 'about' %}aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true"><i data-lucide="info"></i></span><span class="nav-text">About</span></a>
+                <a class="nav-link" href="{{ url_for('sample_batch_csv') }}" aria-label="Sample CSV" title="Sample CSV"><span class="nav-icon" aria-hidden="true"><i data-lucide="download"></i></span><span class="nav-text">Sample CSV</span></a>
+            </nav>
             <div class="session-box public-session">
                 <span class="session-label">Secure demo portal</span>
                 <a class="signout-link" href="{{ url_for('login') }}">Open portal</a>
@@ -50,18 +64,18 @@
             {% endif %}
         </aside>
 
-        <main class="content">
+        <main class="content" id="main-content" tabindex="-1">
             <header class="topbar">
                 <div>
                     <span class="eyebrow">{{ title or "Workspace" }}</span>
                     <strong>{{ app_title }}</strong>
                 </div>
                 <div class="topbar-status">
-                    <button class="icon-control" type="button" data-sidebar-toggle aria-label="Toggle navigation">Menu</button>
-                    <button class="command-trigger" type="button" data-command-open>Search</button>
-                    <button class="icon-control" type="button" data-theme-toggle aria-label="Toggle theme">Theme</button>
+                    <button class="icon-control" type="button" data-sidebar-toggle aria-label="Toggle navigation" title="Toggle navigation"><i data-lucide="panel-left-close" aria-hidden="true"></i></button>
+                    <button class="command-trigger" type="button" data-command-open aria-label="Search workspace" title="Search workspace"><i data-lucide="search" aria-hidden="true"></i><span>Search</span></button>
+                    <button class="icon-control" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle theme"><i data-lucide="sun-moon" aria-hidden="true"></i></button>
                     {% if current_username %}
-                    <span>{{ current_username }}</span>
+                    <span class="topbar-identity">{{ current_username }}</span>
                     <span class="status-dot"></span>
                     {% endif %}
                 </div>
@@ -69,7 +83,7 @@
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                <div class="alerts">
+                <div class="alerts" role="status" aria-live="polite">
                     {% for category, message in messages %}
                     <div class="alert alert-{{ category }}">{{ message }}</div>
                     {% endfor %}
@@ -84,7 +98,7 @@
         <div class="command-dialog" role="dialog" aria-modal="true" aria-label="App search">
             <div class="command-head">
                 <strong>Search {{ app_name }}</strong>
-                <button type="button" class="ghost-button" data-command-close>Close</button>
+                <button type="button" class="ghost-button icon-control" data-command-close aria-label="Close search" title="Close search"><i data-lucide="x" aria-hidden="true"></i></button>
             </div>
             <input data-command-input type="search" placeholder="Search pages and reports">
             <div class="command-results" data-command-results></div>

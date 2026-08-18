@@ -1,8 +1,7 @@
-from database.db import create_tables, get_connection
+from database.db import get_connection
 
 
 def _fetchall(query, params=()):
-    create_tables()
     conn = get_connection()
     rows = conn.execute(query, params).fetchall()
     conn.close()
@@ -10,7 +9,6 @@ def _fetchall(query, params=()):
 
 
 def _fetchone(query, params=()):
-    create_tables()
     conn = get_connection()
     row = conn.execute(query, params).fetchone()
     conn.close()
@@ -169,7 +167,6 @@ def get_recent_batches(username=None, limit=10):
 
 
 def save_batch_prediction(username, filename, total, fraud, genuine, fraud_rate, average_probability):
-    create_tables()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(

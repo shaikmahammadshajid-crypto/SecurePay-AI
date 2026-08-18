@@ -11,9 +11,10 @@ DB_PATH = DATABASE_PATH
 
 def get_connection():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=5)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA busy_timeout = 5000")
     return conn
 
 
@@ -165,6 +166,14 @@ def create_tables():
     cursor.execute("UPDATE users SET role = 'user' WHERE role IS NULL OR role = ''")
     seed_admin_account(cursor)
     migrate_prediction_history(cursor)
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_predictions_username_created_at "
+        "ON predictions(username, created_at DESC)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_batch_predictions_username_created_at "
+        "ON batch_predictions(username, created_at DESC)"
+    )
 
     conn.commit()
     conn.close()

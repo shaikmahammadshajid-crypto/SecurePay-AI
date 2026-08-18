@@ -1,24 +1,24 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, trust_strip, insight_card %}
 
 {% block content %}
-<section class="hero">
-    <div>
-        <span class="kicker">Version 1 fraud detection</span>
-        <h1>SecurePay AI</h1>
-        <p>AI-powered credit-card fraud detection with manual scoring, CSV batch prediction, analytics, SHAP-ready explanations, and PDF reporting.</p>
-    </div>
-    <div class="security-visual">
-        <div class="risk-ring" data-risk-meter="72">
-            <span>RF</span>
-            <small>model</small>
-        </div>
-        <div class="signal-lanes">
-            <span style="--lane: 100%"><b>30 feature schema</b></span>
-            <span style="--lane: 84%"><b>bcrypt authentication</b></span>
-            <span style="--lane: 68%"><b>SQLite audit trail</b></span>
-        </div>
-    </div>
-</section>
+{{ page_header(
+    "Version 1 secure fraud workspace",
+    "SecurePay AI",
+    "A focused AI-powered credit-card fraud detection system for transaction scoring, CSV screening, SHAP-ready explanations, analytics, and audit reports.",
+    "Download Sample CSV",
+    url_for('sample_batch_csv'),
+    "About the Model",
+    url_for('about'),
+    ["bcrypt auth", "Random Forest", "PDF audit reports"]
+) }}
+
+{{ trust_strip([
+    {"label": "Credentials", "value": "bcrypt hashed"},
+    {"label": "Access", "value": "Role protected"},
+    {"label": "Model", "value": "30 verified inputs"},
+    {"label": "Reports", "value": "Audit-ready PDF"}
+]) }}
 
 <section class="split">
     <form class="panel role-card" method="post">
@@ -26,6 +26,7 @@
         <h2>Login</h2>
         <p class="muted">Use your registered account. Admin users are routed to the admin dashboard automatically.</p>
         <input type="hidden" name="action" value="login">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <label>Username<input name="username" autocomplete="username" required></label>
         <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
         <button type="submit">Login</button>
@@ -36,35 +37,19 @@
         <h2>Register</h2>
         <p class="muted">Create a standard user account for fraud-detection demos and personal prediction history.</p>
         <input type="hidden" name="action" value="register">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <label>Username<input name="username" autocomplete="username" required></label>
         <label>Email<input name="email" type="email" autocomplete="email" required></label>
-        <label>Password<input name="password" type="password" minlength="6" autocomplete="new-password" required></label>
+        <label>Password<input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+        <label>Confirm password<input name="password_confirmation" type="password" minlength="8" autocomplete="new-password" required></label>
+        <p class="muted">Use at least 8 characters for a stronger demo account password.</p>
         <button type="submit">Create Account</button>
     </form>
 </section>
 
-<section class="grid two">
-    <div class="panel">
-        <h2>Demo Workflow</h2>
-        <div class="list-stack">
-            <span>Register or login</span>
-            <span>Run manual fraud prediction</span>
-            <span>Upload a batch CSV</span>
-            <span>Open analytics, history, and reports</span>
-        </div>
-    </div>
-    <div class="panel">
-        <h2>Security Controls</h2>
-        <div class="list-stack">
-            <span>Passwords are stored with bcrypt hashes</span>
-            <span>Admin pages enforce server-side role checks</span>
-            <span>CSV uploads are validated before scoring</span>
-            <span>Model artifacts are loaded once and reused</span>
-        </div>
-        <div class="button-row">
-            <a class="button-link secondary" href="{{ url_for('sample_batch_csv') }}">Download Sample CSV</a>
-            <a class="button-link secondary" href="{{ url_for('about') }}">About</a>
-        </div>
-    </div>
+<section class="insight-grid" aria-label="Onboarding guidance">
+    {{ insight_card("Demo Workflow", "Register, run a manual prediction, upload a CSV batch, then review analytics, history, and reports.", "Built for viva and portfolio demos.") }}
+    {{ insight_card("Security Controls", "Passwords are hashed, sessions are protected, and admin routes require server-side authorization.", "No sensitive auth debug logs.") }}
+    {{ insight_card("Model Contract", "The app preserves Time, V1-V28, and Amount in the trained order before scaling.", "Feature order is centralized.") }}
 </section>
 {% endblock %}

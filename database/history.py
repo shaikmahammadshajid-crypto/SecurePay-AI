@@ -1,6 +1,6 @@
 import json
 
-from database.db import create_tables, get_connection
+from database.db import get_connection
 
 
 def save_prediction(
@@ -13,7 +13,6 @@ def save_prediction(
     model_name=None,
     features=None,
 ):
-    create_tables()
     features_json = json.dumps(features) if features is not None else None
     probability_value = None if probability is None else float(probability)
 
@@ -71,7 +70,6 @@ def save_prediction(
 
 
 def _rows(query, params=()):
-    create_tables()
     conn = get_connection()
     rows = conn.execute(query, params).fetchall()
     conn.close()

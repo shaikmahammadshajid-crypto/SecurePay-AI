@@ -1,16 +1,22 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, insight_card, empty_state %}
 
 {% block content %}
-<section class="hero compact">
-    <div>
-        <span class="kicker">Manual fraud prediction</span>
-        <h1>Analyze Transaction</h1>
-        <p>Enter the exact 30 model features: Time, V1 through V28, and Amount. SecurePay AI preserves the trained feature order before scaling and prediction.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link secondary" href="{{ url_for('sample_batch_csv') }}">CSV Template</a>
-        <a class="button-link secondary" href="{{ url_for('history') }}">History</a>
-    </div>
+{{ page_header(
+    "Manual fraud prediction",
+    "Analyze Transaction",
+    "Enter the exact 30 trained model features. SecurePay AI validates values, orders features, scales inputs, scores fraud risk, and stores the audit record.",
+    "CSV Template",
+    url_for('sample_batch_csv'),
+    "History",
+    url_for('history'),
+    ["Validation first", "Scaler transform", "Random Forest score"]
+) }}
+
+<section class="insight-grid" aria-label="Prediction workflow">
+    {{ insight_card("Input Integrity", "Time and Amount cannot be negative; every PCA signal must be numeric and finite.", "Invalid entries are blocked before inference.") }}
+    {{ insight_card("AI Risk Insight", "The model returns a fraud/genuine class and probability when supported by the artifact.", "Probability is never fabricated.") }}
+    {{ insight_card("Audit Trail", "Each successful prediction is saved with transaction ID, risk level, model name, and timestamp.", "Reports can be generated immediately.") }}
 </section>
 
 <section class="panel">
@@ -52,6 +58,7 @@
 </section>
 
 <form class="panel" method="post" data-prediction-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="panel-head">
         <h2>Transaction Fields</h2>
         <span class="muted">Required model inputs</span>
@@ -87,6 +94,19 @@
     </div>
 </section>
 
+<section class="panel">
+    <div class="panel-head">
+        <h2>Transaction Status Timeline</h2>
+        <span class="status-pill" data-level="{{ result.risk_level|lower }}">{{ result.risk_level }}</span>
+    </div>
+    <div class="timeline">
+        <div class="timeline-step"><p><strong>Input validated</strong><br>All 30 required features passed numeric and range checks.</p></div>
+        <div class="timeline-step"><p><strong>Model scored</strong><br>{{ result.model_name }} returned {{ result.prediction_text }} with {{ result.probability_display }} fraud probability.</p></div>
+        <div class="timeline-step"><p><strong>Risk classified</strong><br>The transaction was categorized as {{ result.risk_level }} for review prioritization.</p></div>
+        <div class="timeline-step"><p><strong>Audit saved</strong><br>Record {{ result.transaction_id }} is available in history and reports.</p></div>
+    </div>
+</section>
+
 <section class="grid two">
     <div class="panel">
         <h2>Technical Explanation</h2>
@@ -111,15 +131,12 @@
         <p>{{ shap_explanation.technical }}</p>
         <p><strong>{{ shap_explanation.simple }}</strong></p>
         {% else %}
-        <div class="empty-state">
-            <strong>SHAP unavailable</strong>
-            <p>{{ shap_explanation.message if shap_explanation else "Feature attribution was not generated." }}</p>
-        </div>
+        {{ empty_state("SHAP unavailable", shap_explanation.message if shap_explanation else "Feature attribution was not generated.") }}
         {% endif %}
     </div>
     <div class="panel chart-panel">
         <h2>Feature Attribution</h2>
-        {% if shap_chart %}{{ shap_chart|safe }}{% else %}<div class="empty-state"><strong>No attribution chart</strong><p>The prediction completed without a SHAP chart.</p></div>{% endif %}
+        {% if shap_chart %}{{ shap_chart|safe }}{% else %}{{ empty_state("No attribution chart", "The prediction completed without a SHAP chart.") }}{% endif %}
     </div>
 </section>
 

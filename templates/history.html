@@ -1,17 +1,17 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, empty_state %}
 
 {% block content %}
-<section class="hero compact">
-    <div>
-        <span class="kicker">Prediction audit trail</span>
-        <h1>Prediction History</h1>
-        <p>Search, sort, filter, and review saved credit-card fraud predictions. Standard users see only their own records.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link" href="{{ url_for('download_audit_report') }}">Download Audit PDF</a>
-        <a class="button-link secondary" href="{{ url_for('predict') }}">Manual Prediction</a>
-    </div>
-</section>
+{{ page_header(
+    "Prediction audit trail",
+    "Transaction History",
+    "Search, sort, filter, and review saved credit-card fraud predictions. Standard users see only their own records.",
+    "Download Audit PDF",
+    url_for('download_audit_report'),
+    "Manual Prediction",
+    url_for('predict'),
+    ["User-scoped records", "Sortable table", "Per-transaction reports"]
+) }}
 
 <section class="panel">
     <form class="filter-row" method="get">
@@ -74,10 +74,7 @@
         </table>
     </div>
     {% else %}
-    <div class="empty-state">
-        <strong>No prediction history</strong>
-        <p>Run manual prediction to create your first saved record.</p>
-    </div>
+    {{ empty_state("No prediction history", "Run manual prediction to create your first saved record.", url_for('predict'), "Analyze Transaction") }}
     {% endif %}
 </section>
 {% endblock %}

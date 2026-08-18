@@ -1,17 +1,17 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, metric_card, empty_state %}
 
 {% block content %}
-<section class="hero compact">
-    <div>
-        <span class="kicker">User profile</span>
-        <h1>Profile</h1>
-        <p>Review your account details, saved prediction totals, average fraud probability, and recent fraud-detection activity.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link" href="{{ url_for('predict') }}">Manual Prediction</a>
-        <a class="button-link secondary" href="{{ url_for('reports') }}">Reports</a>
-    </div>
-</section>
+{{ page_header(
+    "User profile",
+    "Profile",
+    "Review account details, saved prediction totals, average fraud probability, and recent fraud-detection activity.",
+    "Manual Prediction",
+    url_for('predict'),
+    "Reports",
+    url_for('reports'),
+    ["Personal audit trail", "Secure session", "User-scoped history"]
+) }}
 
 <section class="grid two">
     <div class="panel">
@@ -25,11 +25,11 @@
     </div>
     <div class="panel">
         <h2>Prediction Statistics</h2>
-        <div class="mini-metrics">
-            <span><strong data-count="{{ summary.total }}">0</strong> total</span>
-            <span><strong data-count="{{ summary.fraud }}">0</strong> fraud</span>
-            <span><strong data-count="{{ summary.average_probability }}" data-suffix="%">0%</strong> avg probability</span>
-        </div>
+        <section class="metrics profile-metrics" aria-label="Profile prediction metrics">
+            {{ metric_card("Total", summary.total, "", "Saved records") }}
+            {{ metric_card("Fraud", summary.fraud, "", "Flagged records", "danger") }}
+            {{ metric_card("Avg Probability", summary.average_probability, "%", "Mean fraud score") }}
+        </section>
         <p class="muted">{{ summary.latest }}</p>
     </div>
 </section>
@@ -40,6 +40,10 @@
         <input class="table-search" data-table-search type="search" placeholder="Search recent predictions">
     </div>
     {% set rows = rows %}
-    {% include "partials/simple_table.html" %}
+    {% if rows %}
+        {% include "partials/simple_table.html" %}
+    {% else %}
+        {{ empty_state("No recent predictions", "Analyze a transaction to populate your profile activity.", url_for('predict'), "Analyze Transaction") }}
+    {% endif %}
 </section>
 {% endblock %}

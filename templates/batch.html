@@ -1,20 +1,27 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, metric_card, insight_card %}
 
 {% block content %}
-<section class="hero compact">
-    <div>
-        <span class="kicker">Batch CSV prediction</span>
-        <h1>Screen Transaction CSV</h1>
-        <p>Upload a CSV containing the 30 required model features. The app validates the file before running the Random Forest pipeline.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link secondary" href="{{ url_for('sample_batch_csv') }}">Download Template</a>
-        <a class="button-link secondary" href="{{ url_for('analytics') }}">Analytics</a>
-    </div>
+{{ page_header(
+    "Batch CSV prediction",
+    "Screen Transaction CSV",
+    "Validate and score many credit-card transactions with the same trained Random Forest pipeline used for manual prediction.",
+    "Download Template",
+    url_for('sample_batch_csv'),
+    "Analytics",
+    url_for('analytics'),
+    ["CSV validation", "Batch export", "Audit summaries"]
+) }}
+
+<section class="insight-grid" aria-label="Batch workflow guidance">
+    {{ insight_card("Validation Gate", "The model does not run until required columns, numeric values, row count, and file type pass validation.", "Prevents malformed scoring jobs.") }}
+    {{ insight_card("Risk Prioritization", "Fraud probability and risk level are appended to each scored row for fast review.", "Sort the preview table by probability.") }}
+    {{ insight_card("Export Package", "CSV, Excel, and PDF downloads are generated after successful scoring.", "Keep reports for audit review.") }}
 </section>
 
 <section class="grid two">
     <form class="panel upload-panel" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <h2>Upload CSV</h2>
         <label class="dropzone" data-dropzone>
             <input name="csv_file" type="file" accept=".csv" required>
@@ -37,10 +44,27 @@
 
 {% if result %}
 <section class="metrics metric-strip">
-    <div><span>Total Transactions</span><strong data-count="{{ result.total }}">0</strong></div>
-    <div><span>Fraud Transactions</span><strong data-count="{{ result.fraud }}">0</strong></div>
-    <div><span>Genuine Transactions</span><strong data-count="{{ result.genuine }}">0</strong></div>
-    <div><span>Fraud Rate</span><strong data-count="{{ result.fraud_rate }}" data-suffix="%">0%</strong></div>
+    {{ metric_card("Total Transactions", result.total, "", "Rows scored in this upload") }}
+    {{ metric_card("Fraud Transactions", result.fraud, "", "Rows flagged by model", "danger") }}
+    {{ metric_card("Genuine Transactions", result.genuine, "", "Rows classified genuine", "success") }}
+    {{ metric_card("Fraud Rate", result.fraud_rate, "%", "Batch-level fraud concentration") }}
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Alert Center</h2>
+        <span class="status-pill" data-level="{{ 'critical' if result.fraud_rate >= 10 else 'high' if result.fraud_rate >= 2 else 'low' }}">Batch review</span>
+    </div>
+    <div class="alert-center">
+        <article class="alert-item {{ 'danger' if result.fraud_rate >= 10 else 'warning' if result.fraud_rate >= 2 else '' }}">
+            <span class="alert-severity"></span>
+            <div>
+                <strong>{{ result.assessment.summary }}</strong>
+                <span>{{ result.assessment.action }}</span>
+            </div>
+            <span class="status-pill" data-level="{{ 'critical' if result.fraud_rate >= 10 else 'medium' if result.fraud_rate >= 2 else 'low' }}">{{ "%.2f"|format(result.average_probability) }}% avg probability</span>
+        </article>
+    </div>
 </section>
 
 <section class="panel visual-panel">

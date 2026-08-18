@@ -363,6 +363,8 @@ Download a sample template from:
 - **Server-Side Authorization:** Admin pages are protected by backend role checks.
 - **Parameterized SQL:** SQLite queries avoid string concatenation with user input.
 - **Secure Sessions:** HTTP-only cookies, same-site cookies, and optional secure cookies.
+- **CSRF Protection:** Every state-changing form includes a server-validated CSRF token.
+- **Safer Registration:** Usernames have a constrained schema, passwords require at least eight characters, and registration requires password confirmation.
 - **Safe Upload Handling:** CSV files are validated before model execution.
 - **No Hardcoded Production Secrets:** Secret key and admin password are loaded from environment variables.
 - **No Sensitive Debug Logs:** Passwords, hashes, and secrets are not logged.

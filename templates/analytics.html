@@ -1,57 +1,63 @@
 {% extends "base.html" %}
+{% from "partials/ui.html" import page_header, metric_card, insight_card, empty_state %}
 
 {% block content %}
-<section class="hero compact">
-    <div>
-        <span class="kicker">Fraud analytics</span>
-        <h1>Analytics</h1>
-        <p>Review prediction volume, fraud percentage, risk distribution, probability spread, transaction amount distribution, and available model metrics.</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link secondary" href="{{ url_for('batch') }}">Batch Prediction</a>
-        <a class="button-link secondary" href="{{ url_for('reports') }}">Reports</a>
-    </div>
+{{ page_header(
+    "Fraud analytics",
+    "Risk Intelligence",
+    "Review prediction volume, fraud percentage, risk distribution, probability spread, transaction amount distribution, and model readiness from one analytics surface.",
+    "Batch Prediction",
+    url_for('batch'),
+    "Reports",
+    url_for('reports'),
+    ["Live prediction history", "Responsive Plotly charts", "Model metrics only when available"]
+) }}
+
+<section class="metrics metric-strip">
+    {{ metric_card("Total Predictions", stats.predictions, "", "Saved scoring events") }}
+    {{ metric_card("Fraud Predictions", stats.frauds, "", "Flagged transactions", "danger") }}
+    {{ metric_card("Genuine Predictions", stats.genuine, "", "Cleared transactions", "success") }}
+    {{ metric_card("Fraud Percentage", stats.fraud_rate, "%", "Fraud share of predictions") }}
 </section>
 
 <section class="metrics metric-strip">
-    <div><span>Total Predictions</span><strong data-count="{{ stats.predictions }}">0</strong></div>
-    <div><span>Fraud Predictions</span><strong data-count="{{ stats.frauds }}">0</strong></div>
-    <div><span>Genuine Predictions</span><strong data-count="{{ stats.genuine }}">0</strong></div>
-    <div><span>Fraud Percentage</span><strong data-count="{{ stats.fraud_rate }}" data-suffix="%">0%</strong></div>
+    {{ metric_card("Avg Fraud Probability", stats.average_probability, "%", "Mean model probability") }}
+    {{ metric_card("Avg Transaction Amount", "$" ~ stats.average_amount, "", "Mean amount across predictions") }}
+    {{ metric_card("High Risk", stats.high_risk, "", "HIGH and CRITICAL records", "warning") }}
+    {{ metric_card("Batch Jobs", stats.batches, "", "CSV screening runs") }}
 </section>
 
-<section class="metrics metric-strip">
-    <div><span>Avg Fraud Probability</span><strong data-count="{{ stats.average_probability }}" data-suffix="%">0%</strong></div>
-    <div><span>Avg Transaction Amount</span><strong>${{ stats.average_amount }}</strong></div>
-    <div><span>High Risk</span><strong data-count="{{ stats.high_risk }}">0</strong></div>
-    <div><span>Batch Jobs</span><strong data-count="{{ stats.batches }}">0</strong></div>
+<section class="insight-grid" aria-label="Analytics insights">
+    {{ insight_card("Trend Review", "Use the activity chart to spot bursts of fraud predictions over time.", "Investigate sudden increases.", "warning") }}
+    {{ insight_card("Probability Spread", "Probability distribution helps reveal whether the model is producing concentrated or uncertain outputs.", "Use with risk bands.") }}
+    {{ insight_card("Model Transparency", "Metrics are displayed only when an evaluation file exists; no performance values are invented.", "Responsible ML reporting.") }}
 </section>
 
 <section class="grid two">
     <div class="panel chart-panel">
         <h2>Fraud vs Genuine</h2>
-        {% if charts.fraud %}{{ charts.fraud|safe }}{% else %}<div class="empty-state"><strong>No prediction data</strong><p>Run predictions to populate analytics.</p></div>{% endif %}
+        {% if charts.fraud %}{{ charts.fraud|safe }}{% else %}{{ empty_state("No prediction data", "Run predictions to populate analytics.", url_for('predict'), "Analyze Transaction") }}{% endif %}
     </div>
     <div class="panel chart-panel">
         <h2>Risk Distribution</h2>
-        {% if charts.risk %}{{ charts.risk|safe }}{% else %}<div class="empty-state"><strong>No risk data</strong><p>Risk distribution appears after predictions are saved.</p></div>{% endif %}
+        {% if charts.risk %}{{ charts.risk|safe }}{% else %}{{ empty_state("No risk data", "Risk distribution appears after predictions are saved.", url_for('predict'), "Analyze Transaction") }}{% endif %}
     </div>
 </section>
 
 <section class="grid two">
     <div class="panel chart-panel">
         <h2>Prediction Trends</h2>
-        {% if charts.trend %}{{ charts.trend|safe }}{% else %}<div class="empty-state"><strong>No trend data</strong><p>Saved predictions create trend data.</p></div>{% endif %}
+        {% if charts.trend %}{{ charts.trend|safe }}{% else %}{{ empty_state("No trend data", "Saved predictions create trend data.", url_for('predict'), "Create First Record") }}{% endif %}
     </div>
     <div class="panel chart-panel">
         <h2>Fraud Probability Distribution</h2>
-        {% if charts.probability %}{{ charts.probability|safe }}{% else %}<div class="empty-state"><strong>No probability data</strong><p>Probability charts require model outputs.</p></div>{% endif %}
+        {% if charts.probability %}{{ charts.probability|safe }}{% else %}{{ empty_state("No probability data", "Probability charts require model outputs.", url_for('predict'), "Analyze Transaction") }}{% endif %}
     </div>
 </section>
 
 <section class="panel chart-panel">
     <h2>Transaction Amount Distribution</h2>
-    {% if charts.amount %}{{ charts.amount|safe }}{% else %}<div class="empty-state"><strong>No amount data</strong><p>Amount distribution appears after manual predictions.</p></div>{% endif %}
+    {% if charts.amount %}{{ charts.amount|safe }}{% else %}{{ empty_state("No amount data", "Amount distribution appears after manual predictions.", url_for('predict'), "Analyze Transaction") }}{% endif %}
 </section>
 
 <section class="grid two">
@@ -67,6 +73,7 @@
         <pre class="metrics-text">{{ model_info.metrics }}</pre>
     </div>
     <form class="panel upload-panel" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <h2>Labeled Dataset Check</h2>
         <label class="dropzone" data-dropzone>
             <input name="csv_file" type="file" accept=".csv" required>

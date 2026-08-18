@@ -1,0 +1,60 @@
+{% macro page_header(kicker, title, description, primary_label=None, primary_href=None, secondary_label=None, secondary_href=None, meta=None) %}
+<section class="page-hero">
+    <div class="page-hero-copy">
+        <span class="kicker">{{ kicker }}</span>
+        <h1>{{ title }}</h1>
+        <p>{{ description }}</p>
+        {% if meta %}
+        <div class="trust-row compact">
+            {% for item in meta %}
+            <span>{{ item }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% if primary_label or secondary_label %}
+    <div class="hero-actions">
+        {% if primary_label and primary_href %}<a class="button-link" href="{{ primary_href }}">{{ primary_label }}</a>{% endif %}
+        {% if secondary_label and secondary_href %}<a class="button-link secondary" href="{{ secondary_href }}">{{ secondary_label }}</a>{% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endmacro %}
+
+{% macro metric_card(label, value, suffix='', detail='', tone='') %}
+<div class="metric-card {{ tone }}">
+    <span>{{ label }}</span>
+    <strong{% if value is number %} data-count="{{ value }}"{% endif %}{% if suffix %} data-suffix="{{ suffix }}"{% endif %}>{{ value }}{{ suffix }}</strong>
+    {% if detail %}<small>{{ detail }}</small>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro trust_strip(items) %}
+<section class="trust-strip" aria-label="Security trust indicators">
+    {% for item in items %}
+    <div>
+        <span>{{ item.label }}</span>
+        <strong>{{ item.value }}</strong>
+    </div>
+    {% endfor %}
+</section>
+{% endmacro %}
+
+{% macro insight_card(title, body, action=None, tone='') %}
+<article class="insight-card {{ tone }}">
+    <div>
+        <span class="insight-dot"></span>
+        <h2>{{ title }}</h2>
+    </div>
+    <p>{{ body }}</p>
+    {% if action %}<strong>{{ action }}</strong>{% endif %}
+</article>
+{% endmacro %}
+
+{% macro empty_state(title, body, href=None, label=None) %}
+<div class="empty-state elevated">
+    <strong>{{ title }}</strong>
+    <p>{{ body }}</p>
+    {% if href and label %}<a class="button-link secondary" href="{{ href }}">{{ label }}</a>{% endif %}
+</div>
+{% endmacro %}

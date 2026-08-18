@@ -30,6 +30,27 @@ def test_dashboard_requires_login():
     assert "/login" in response.headers["Location"]
 
 
+def test_post_without_a_csrf_token_is_rejected_before_login():
+    client = app.test_client()
+
+    response = client.post(
+        "/login",
+        data={"action": "login", "username": "alice", "password": "secure123"},
+    )
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/login")
+
+
+def test_login_page_includes_a_csrf_token():
+    client = app.test_client()
+
+    response = client.get("/login")
+
+    assert response.status_code == 200
+    assert b'name="csrf_token"' in response.data
+
+
 def test_required_pages_are_protected():
     client = app.test_client()
 
