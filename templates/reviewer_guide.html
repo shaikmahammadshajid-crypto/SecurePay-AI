@@ -49,10 +49,12 @@
 </section>
 
 <section class="quick-actions">
+    <a href="{{ url_for('demo') }}">Public Demo</a>
     <a href="{{ url_for('login') }}">Login/Register</a>
     <a href="{{ url_for('predict', demo='baseline') }}">Try Demo Prediction</a>
     <a href="{{ url_for('assistant') }}">AI Assistant</a>
     <a href="{{ url_for('health') }}">Health Endpoint</a>
     <a href="{{ url_for('presentation_download') }}">Download Presentation File</a>
+    <a href="{{ url_for('sample_batch_csv') }}">Sample Batch CSV</a>
 </section>
 {% endblock %}

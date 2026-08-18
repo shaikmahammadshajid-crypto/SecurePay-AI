@@ -1,11 +1,13 @@
 import os
 import uuid
 from functools import wraps
+from io import StringIO
 from urllib.parse import quote
 
 import pandas as pd
 from flask import (
     Flask,
+    Response,
     flash,
     redirect,
     render_template,
@@ -81,6 +83,28 @@ DEMO_TRANSACTIONS = {
             "Amount": "1499",
         },
     },
+    "unusual_pattern": {
+        "label": "Unusual Pattern Transaction",
+        "description": "A more unusual anonymized feature profile for showing how the model reacts to abnormal signal combinations.",
+        "values": {
+            **{column: "0" for column in FEATURE_COLUMNS},
+            "Time": "49200",
+            "V1": "-3.78",
+            "V2": "4.11",
+            "V3": "-5.2",
+            "V4": "3.88",
+            "V5": "-2.44",
+            "V7": "-4.18",
+            "V9": "-2.03",
+            "V10": "-4.72",
+            "V11": "3.11",
+            "V12": "-5.14",
+            "V14": "-6.21",
+            "V16": "-3.38",
+            "V17": "-5.42",
+            "Amount": "752",
+        },
+    },
 }
 
 
@@ -125,6 +149,38 @@ def health():
         "message": summary["message"],
         "checks": checks,
     }, status_code
+
+
+def score_demo_transaction(demo):
+    values = [float(demo["values"][column]) for column in FEATURE_COLUMNS]
+    model = load_model()
+    scaler = load_scaler()
+    prediction, probability = predict_transaction(model, scaler, values)
+    probability_percent = probability_to_percentage(probability)
+    risk_level = get_risk_level(probability)
+    return {
+        "label": demo["label"],
+        "description": demo["description"],
+        "prediction": get_prediction_text(prediction),
+        "probability": probability_percent,
+        "risk_level": risk_level,
+        "recommendation": get_recommendation(probability),
+        "assessment": get_transaction_assessment(
+            prediction=prediction,
+            probability=probability,
+            amount=float(demo["values"]["Amount"]),
+            risk_level=risk_level,
+        ),
+    }
+
+
+def demo_batch_dataframe():
+    rows = []
+    for key, demo in DEMO_TRANSACTIONS.items():
+        row = {column: float(demo["values"][column]) for column in FEATURE_COLUMNS}
+        row["DemoName"] = demo["label"]
+        rows.append(row)
+    return pd.DataFrame(rows)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -189,6 +245,21 @@ def dashboard():
         summary=summary,
         readiness=readiness,
         checks=checks,
+    )
+
+
+@app.get("/demo")
+def demo():
+    try:
+        scored_demos = [score_demo_transaction(demo) for demo in DEMO_TRANSACTIONS.values()]
+    except Exception as exc:
+        scored_demos = []
+        flash(f"Demo scoring failed: {exc}", "error")
+
+    return render_template(
+        "demo.html",
+        title="Public Demo",
+        demos=scored_demos,
     )
 
 
@@ -508,10 +579,42 @@ def reviewer_guide():
 
 @app.get("/presentation-download")
 def presentation_download():
+    try:
+        from reports.pdf_generator import generate_project_presentation_pdf
+    except ModuleNotFoundError:
+        return send_file(
+            "docs/SecurePayAI_Presentation.md",
+            as_attachment=True,
+            download_name="SecurePayAI_Presentation.md",
+        )
+
+    path = generate_project_presentation_pdf()
+    return send_file(
+        path,
+        as_attachment=True,
+        download_name="SecurePayAI_Final_Project_Presentation.pdf",
+    )
+
+
+@app.get("/presentation-notes")
+def presentation_notes():
     return send_file(
         "docs/SecurePayAI_Presentation.md",
         as_attachment=True,
         download_name="SecurePayAI_Presentation.md",
+    )
+
+
+@app.get("/sample-batch.csv")
+def sample_batch_csv():
+    df = demo_batch_dataframe()
+    csv_df = df[FEATURE_COLUMNS]
+    output = StringIO()
+    csv_df.to_csv(output, index=False)
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=securepay_sample_batch.csv"},
     )
 
 

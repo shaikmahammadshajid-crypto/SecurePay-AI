@@ -46,4 +46,25 @@ def test_presentation_document_downloads():
 
     assert response.status_code == 200
     assert response.headers["Content-Disposition"].startswith("attachment;")
-    assert b"Final Project Presentation" in response.data
+    assert response.headers["Content-Type"].startswith(("application/pdf", "text/markdown"))
+
+
+def test_public_demo_renders_actual_project_task():
+    client = app.test_client()
+
+    response = client.get("/demo")
+
+    assert response.status_code == 200
+    assert b"No-login reviewer demo" in response.data
+    assert b"Main task" in response.data
+
+
+def test_sample_batch_csv_downloads_required_columns():
+    client = app.test_client()
+
+    response = client.get("/sample-batch.csv")
+
+    assert response.status_code == 200
+    assert response.headers["Content-Type"].startswith("text/csv")
+    assert b"Time,V1,V2" in response.data
+    assert b"Amount" in response.data

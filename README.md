@@ -22,12 +22,14 @@ The main task of SecurePay AI is to detect potentially fraudulent credit card tr
 ## Reviewer Preparation
 
 - Open the live app and select **Reviewer Guide**.
+- Open **Public Demo** first if the reviewer wants to see the core task without login.
 - Register or login.
 - Open **Predict** and use a demo transaction.
 - Review the prediction, fraud probability, risk level, and recommendation.
 - Open **History** to show saved audit records.
 - Open **AI Assistant** and run `check app health`, `summarize my activity`, or `generate my audit report`.
-- Download the presentation file from **Presentation File** or from `docs/SecurePayAI_Presentation.md`.
+- Download the presentation PDF from **Presentation File**.
+- Use `docs/SecurePayAI_Presentation.md` as preparation notes.
 
 ## Technology Stack
 

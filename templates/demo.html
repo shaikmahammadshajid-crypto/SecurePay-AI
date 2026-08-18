@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <span class="kicker">No-login reviewer demo</span>
+        <h1>SecurePay AI Public Demo</h1>
+        <p>This page shows the actual main task of the project without requiring setup: the trained model scores sample transactions, returns probability, assigns risk, and explains the action.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>What This Project Does</h2>
+    <p><strong>Main task:</strong> detect suspicious credit card transactions using machine learning and support fraud review through probability, risk level, recommendation, and audit evidence.</p>
+    <div class="workflow-steps">
+        <span>Transaction features</span>
+        <span>Scaler preprocessing</span>
+        <span>Random Forest prediction</span>
+        <span>Risk recommendation</span>
+        <span>Audit/report workflow</span>
+    </div>
+</section>
+
+<section class="grid two">
+    {% for demo in demos %}
+    <div class="panel">
+        <h2>{{ demo.label }}</h2>
+        <p class="muted">{{ demo.description }}</p>
+        <div class="mini-metrics">
+            <span>Prediction <strong>{{ demo.prediction }}</strong></span>
+            <span>Probability <strong>{{ demo.probability }}%</strong></span>
+            <span>Risk <strong>{{ demo.risk_level }}</strong></span>
+        </div>
+        <p><strong>Action:</strong> {{ demo.assessment.action }}</p>
+        <p>{{ demo.assessment.review }}</p>
+    </div>
+    {% endfor %}
+</section>
+
+<section class="quick-actions">
+    <a href="{{ url_for('login') }}">Login/Register for Full Workflow</a>
+    <a href="{{ url_for('predict', demo='baseline') }}">Open Demo in Predict Page</a>
+    <a href="{{ url_for('sample_batch_csv') }}">Download Sample Batch CSV</a>
+    <a href="{{ url_for('presentation_download') }}">Download Presentation PDF</a>
+    <a href="{{ url_for('reviewer_guide') }}">Reviewer Guide</a>
+</section>
+{% endblock %}
